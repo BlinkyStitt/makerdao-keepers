@@ -1,0 +1,5 @@
+#!/usr/bin/with-contenv bash
+
+# TODO: actually start the keeper here
+
+tail -f /dev/null
