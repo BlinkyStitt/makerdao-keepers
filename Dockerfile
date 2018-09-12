@@ -7,6 +7,7 @@ RUN docker-install \
     linux-headers \
     make \
     musl-dev \
+    openssl-dev \
     python3-dev \
 ;
 
