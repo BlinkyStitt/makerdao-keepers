@@ -139,7 +139,7 @@ RUN { set -eux; \
 RUN { set -eux; \
     \
     export APP=auction-keeper; \
-    export GIT_HASH=XXX; \
+    export GIT_HASH=19cda06d5bbc9d61e01979f3c40e6bafd9d8b570; \
     \
     export VENV="/opt/$APP"; \
     \
@@ -162,7 +162,7 @@ RUN { set -eux; \
 RUN { set -eux; \
     \
     export APP=bite-keeper; \
-    export GIT_HASH=38e7a362109296f84fd33265af84013c6dadcc62; \
+    export GIT_HASH=e606456115cab88636a88a1ff403a81dd80cca77; \
     \
     export VENV="/opt/$APP"; \
     \
@@ -185,17 +185,14 @@ RUN { set -eux; \
 RUN { set -eux; \
     \
     export APP=cdp-keeper; \
-    export GIT_HASH=XXX; \
+    export GIT_HASH=4396f0483b4109701cc292dc175360b8a0f00e3e; \
     \
     export VENV="/opt/$APP"; \
     \
     mkdir -p "${VENV}"; \
     chown abc:abc "${VENV}"; \
     chroot --userspec=abc / python3.6 -m venv "${VENV}"; \
-    chroot --userspec=abc / "${VENV}/bin/pip" install -U \
-        setuptools=="${SETUPTOOLS_VERSION}" \
-        pip=="${PIP_VERSION}" \
-    ; \
+    chroot --userspec=abc / "${VENV}/bin/pip" install -U setuptools pip; \
     \
     git clone https://github.com/makerdao/${APP}.git "${VENV}/src"; \
     cd "${VENV}/src"; \
@@ -211,17 +208,14 @@ RUN { set -eux; \
 RUN { set -eux; \
     \
     export APP=market-maker-keeper; \
-    export GIT_HASH=XXX; \
+    export GIT_HASH=3f0b2016f186c6c53651143db1e3a2ea6574526d; \
     \
     export VENV="/opt/$APP"; \
     \
     mkdir -p "${VENV}"; \
     chown abc:abc "${VENV}"; \
     chroot --userspec=abc / python3.6 -m venv "${VENV}"; \
-    chroot --userspec=abc / "${VENV}/bin/pip" install -U \
-        setuptools=="${SETUPTOOLS_VERSION}" \
-        pip=="${PIP_VERSION}" \
-    ; \
+    chroot --userspec=abc / "${VENV}/bin/pip" install -U setuptools pip; \
     \
     git clone https://github.com/makerdao/${APP}.git "${VENV}/src"; \
     cd "${VENV}/src"; \
@@ -244,6 +238,7 @@ RUN { set -eux; \
 # TODO: i think dapptools might install this. at the very least it is cloned in /root/.dapp/dapptools/submodules/setzer
 RUN { set -eux; \
     \
+    which setzer; \
     git clone https://github.com/makerdao/setzer /opt/setzer; \
     cd /opt/setzer; \
     make link; \
