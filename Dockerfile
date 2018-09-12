@@ -5,6 +5,7 @@ RUN docker-install \
     automake \
     gcc \
     git \
+    libtool \
     linux-headers \
     make \
     musl-dev \
