@@ -18,7 +18,7 @@ RUN { set -eux; \
     git reset --hard $GIT_HASH; \
     git submodule update --init --recursive; \
     chown -R abc:abc .; \
-    chroot --userspec=abc / pip install -r requirements.txt; \
+    chroot --userspec=abc / pip install -r /opt/arbitrage-keeper/requirements.txt; \
 }
 
 COPY rootfs/ /
