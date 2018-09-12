@@ -2,4 +2,9 @@
 
 # TODO: actually start the keeper here
 
+# TODO: how should we pick what keeper to run and with what flags? each should probably have its own start script
+
+# TODO: make sure transactions aren't stuck
+# plunger --source etherscan,parity_txqueue --wait 0x0101010101010101010101010101010101010101
+
 tail -f /dev/null
