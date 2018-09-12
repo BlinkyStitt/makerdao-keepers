@@ -1,0 +1,32 @@
+image: docker:latest
+
+stages:
+- build
+- release
+
+.gitlab_login: &gitlab_login  # Hidden key that defines an anchor named 'gitlab_login'
+  before_script:
+    - printenv "CI_JOB_TOKEN" | docker login -u gitlab-ci-token --password-stdin "$CI_REGISTRY"
+  after_script:
+    - docker logout "$CI_REGISTRY"
+
+build:
+  <<: *gitlab_login           # Merge the contents of the 'gitlab_login' alias
+  stage: build
+  script:
+    # set the date on everything because docker cache's ADD/COPY by modification time
+    - find . -exec touch -t 201801010000 {} \;
+    # docker build and push
+    - docker build . --force-rm --build-arg FTP_PROXY="$FTP_PROXY" --build-arg HTTP_PROXY="$HTTP_PROXY" --build-arg HTTPS_PROXY="$HTTPS_PROXY" --pull --cache-from "${CI_REGISTRY_IMAGE}:latest" -t "${CI_REGISTRY_IMAGE}:${CI_COMMIT_SHA}"
+    - docker push "${CI_REGISTRY_IMAGE}:${CI_COMMIT_SHA}"
+
+release:
+  <<: *gitlab_login           # Merge the contents of the 'gitlab_login' alias
+  stage: release
+  only:
+    - master
+  script:
+    # TODO: push to docker hub
+    - docker pull "$CI_REGISTRY_IMAGE:$CI_COMMIT_SHA"
+    - docker tag "$CI_REGISTRY_IMAGE:$CI_COMMIT_SHA" "$CI_REGISTRY_IMAGE:latest"
+    - docker push "$CI_REGISTRY_IMAGE:latest"
