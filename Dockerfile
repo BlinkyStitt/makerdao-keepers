@@ -2,6 +2,7 @@ FROM gitlab.stytt.com:5001/docker/python3/alpine-s6
 
 RUN docker-install \
     autoconf \
+    automake \
     gcc \
     git \
     linux-headers \
