@@ -1,3 +1,4 @@
+# this image could definitely be smaller and build faster, but lets just get it working
 FROM gitlab.stytt.com:5001/docker/python3/ubuntu-s6
 
 # for nix. it doesn't officially support installing as root, but it works
@@ -75,6 +76,18 @@ RUN { set -eux; \
     \
     git clone --depth 1 --recursive https://github.com/dapphub/dapptools $HOME/.dapp/dapptools; \
     nix-env -f $HOME/.dapp/dapptools -iA dapp seth solc hevm ethsign; \
+    \
+    # dai
+    cd "$HOME/.dapp/dapptools/submodules/dai-cli"; \
+    make link; \
+    \
+    # setzer for price feeds for market-maker-keeper
+    cd "$HOME/.dapp/dapptools/submodules/setzer"; \
+    make link; \
+    \
+    # terra
+    cd "$HOME/.dapp/dapptools/submodules/terra"; \
+    make link; \
     \
     rm -rf /tmp/*; \
 }
@@ -224,24 +237,16 @@ RUN { set -eux; \
     chown -R abc:abc .; \
     chroot --userspec=abc / "${VENV}/bin/pip" install -r "${VENV}/src/requirements.txt"; \
     \
-    for x in "${VENV}/bin/*-keeper" "${VENV}/bin/*-cancel"; do \
-      ln -sfv "$x" /usr/local/bin/; \
+    cd "$VENV/bin"; \
+    for x in *-keeper *-cancel; do \
+      ln -sfv "$(pwd)/$x" /usr/local/bin/; \
     done; \
+    cd -; \
     \
     # etherdelta-client
     npm install; \
     \
     ln -sfv "$(pwd)/node_modules/.bin/etherdelta-client" /usr/local/bin/; \
-}
-
-# https://github.com/makerdao/setzer for price feeds for market-maker-keeper
-# TODO: i think dapptools might install this. at the very least it is cloned in /root/.dapp/dapptools/submodules/setzer
-RUN { set -eux; \
-    \
-    which setzer; \
-    git clone https://github.com/makerdao/setzer /opt/setzer; \
-    cd /opt/setzer; \
-    make link; \
 }
 
 COPY rootfs/ /
