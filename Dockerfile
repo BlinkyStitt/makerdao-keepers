@@ -66,14 +66,13 @@ RUN { set -eux; \
 
 # https://github.com/dapphub/dapptools
 # TODO: pin specific version
-# TODO: does this also install jshon? does this install setzer?
-# TODO: fetch with curl instead?
 RUN { set -eux; \
     \
     export GNUPGHOME="$(mktemp -d -p /tmp)"; \
     export MANPATH=""; \
     . /root/.nix-profile/etc/profile.d/nix.sh; \
     \
+    # dapp, seth, solc, hevm, ethsign (and also jshon)
     git clone --depth 1 --recursive https://github.com/dapphub/dapptools $HOME/.dapp/dapptools; \
     nix-env -f $HOME/.dapp/dapptools -iA dapp seth solc hevm ethsign; \
     \
