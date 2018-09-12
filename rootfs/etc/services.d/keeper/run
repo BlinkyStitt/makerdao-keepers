@@ -1,6 +1,7 @@
 #!/usr/bin/with-contenv bash
-
 # TODO: actually start the keeper here
+
+# TODO: make sure ETH_RPC_HOST and ETH_RPC_PORT are set
 
 # TODO: how should we pick what keeper to run and with what flags? each should probably have its own start script
 

@@ -74,7 +74,7 @@ RUN { set -eux; \
     \
     # dapp, seth, solc, hevm, ethsign (and also jshon)
     git clone --depth 1 --recursive https://github.com/dapphub/dapptools $HOME/.dapp/dapptools; \
-    nix-env -f $HOME/.dapp/dapptools -iA dapp seth solc hevm ethsign; \
+    nix-env -f $HOME/.dapp/dapptools -iA dapp ethsign hevm seth solc token ; \
     \
     # dai
     cd "$HOME/.dapp/dapptools/submodules/dai-cli"; \
