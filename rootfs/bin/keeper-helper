@@ -10,6 +10,8 @@ else
   # notice that we do NOT shift here.
 fi
 
+# TODO: if nix things aren't on the path, add them?
+
 # enter the virtualenv so that when their script calls pyhon, it calls the right python
 . "/opt/${app}/bin/activate"
 
