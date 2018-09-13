@@ -3,6 +3,7 @@ FROM gitlab.stytt.com:5001/docker/dapptools as dapptools
 # this image could definitely be smaller and build faster, but lets just get it working
 FROM gitlab.stytt.com:5001/docker/python3/ubuntu-s6
 
+# TODO: i think some of these (sudo for sure) can be removed now that nix stuff is in it's own
 RUN docker-install \
     autoconf \
     automake \
@@ -193,7 +194,7 @@ RUN { set -eux; \
     # TODO: this doesn't seem to install anything onto the path. is this correct?
     \
     # TODO: run help for all the -keeper and -cancel and any other scripts
-    APP=$APP keeper-helper oasis-market-maker-keeper --help; \
+    APP="$APP" keeper-helper oasis-market-maker-keeper --help; \
 }
 
 # how big are these layers? should we copy nix stuff earlier?
