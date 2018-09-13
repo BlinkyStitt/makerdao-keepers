@@ -49,14 +49,16 @@ RUN { set -eux; \
     git reset --hard 754a6da46d25862983ebf2c19eb70632b46896f5; \
 }
 
+COPY /rootfs/bin/keeper-helper /bin/
+
 # https://github.com/makerdao/plunger
 # run this before starting any of the keepers since pending transactions can break things!
 RUN { set -eux; \
     \
-    export APP=plunger; \
-    export GIT_HASH=38e7a362109296f84fd33265af84013c6dadcc62; \
+    APP=plunger; \
+    GIT_HASH=38e7a362109296f84fd33265af84013c6dadcc62; \
     \
-    export VENV="/opt/$APP"; \
+    VENV="/opt/$APP"; \
     \
     mkdir -p "${VENV}"; \
     chown abc:abc "${VENV}"; \
@@ -70,17 +72,16 @@ RUN { set -eux; \
     chown -R abc:abc .; \
     chroot --userspec=abc / "${VENV}/bin/pip" install -r "${VENV}/src/requirements.txt"; \
     \
-    # TODO: this is wrong. look at /opt/$APP/src/bin/$APP. they need an actual setup.py
-    ln -sfv "${VENV}/bin/${APP}" /usr/local/bin/; \
+    keeper-helper "$APP" --help; \
 }
 
 # https://github.com/makerdao/arbitrage-keeper
 RUN { set -eux; \
     \
-    export APP=arbitrage-keeper; \
-    export GIT_HASH=0679f30335ac48b96f5e60550c6a49e46612be8a; \
+    APP=arbitrage-keeper; \
+    GIT_HASH=0679f30335ac48b96f5e60550c6a49e46612be8a; \
     \
-    export VENV="/opt/$APP"; \
+    VENV="/opt/$APP"; \
     \
     mkdir -p "${VENV}"; \
     chown abc:abc "${VENV}"; \
@@ -94,17 +95,16 @@ RUN { set -eux; \
     chown -R abc:abc .; \
     chroot --userspec=abc / "${VENV}/bin/pip" install -r "${VENV}/src/requirements.txt"; \
     \
-    # TODO: this is wrong. look at /opt/$APP/src/bin/$APP. they need an actual setup.py
-    ln -sfv "${VENV}/bin/${APP}" /usr/local/bin/; \
+    keeper-helper "$APP" --help; \
 }
 
 # https://github.com/makerdao/auction-keeper
 RUN { set -eux; \
     \
-    export APP=auction-keeper; \
-    export GIT_HASH=19cda06d5bbc9d61e01979f3c40e6bafd9d8b570; \
+    APP=auction-keeper; \
+    GIT_HASH=19cda06d5bbc9d61e01979f3c40e6bafd9d8b570; \
     \
-    export VENV="/opt/$APP"; \
+    VENV="/opt/$APP"; \
     \
     mkdir -p "${VENV}"; \
     chown abc:abc "${VENV}"; \
@@ -118,17 +118,16 @@ RUN { set -eux; \
     chown -R abc:abc .; \
     chroot --userspec=abc / "${VENV}/bin/pip" install -r "${VENV}/src/requirements.txt"; \
     \
-    # TODO: this is wrong. look at /opt/$APP/src/bin/$APP. they need an actual setup.py
-    ln -sfv "${VENV}/bin/${APP}" /usr/local/bin/; \
+    keeper-helper "$APP" --help; \
 }
 
 # https://github.com/makerdao/bite-keeper
 RUN { set -eux; \
     \
-    export APP=bite-keeper; \
-    export GIT_HASH=e606456115cab88636a88a1ff403a81dd80cca77; \
+    APP=bite-keeper; \
+    GIT_HASH=e606456115cab88636a88a1ff403a81dd80cca77; \
     \
-    export VENV="/opt/$APP"; \
+    VENV="/opt/$APP"; \
     \
     mkdir -p "${VENV}"; \
     chown abc:abc "${VENV}"; \
@@ -142,17 +141,16 @@ RUN { set -eux; \
     chown -R abc:abc .; \
     chroot --userspec=abc / "${VENV}/bin/pip" install -r "${VENV}/src/requirements.txt"; \
     \
-    # TODO: this is wrong. look at /opt/$APP/src/bin/$APP. they need an actual setup.py
-    ln -sfv "${VENV}/bin/${APP}" /usr/local/bin/; \
+    keeper-helper "$APP" --help; \
 }
 
 # https://github.com/makerdao/cdp-keeper
 RUN { set -eux; \
     \
-    export APP=cdp-keeper; \
-    export GIT_HASH=4396f0483b4109701cc292dc175360b8a0f00e3e; \
+    APP=cdp-keeper; \
+    GIT_HASH=4396f0483b4109701cc292dc175360b8a0f00e3e; \
     \
-    export VENV="/opt/$APP"; \
+    VENV="/opt/$APP"; \
     \
     mkdir -p "${VENV}"; \
     chown abc:abc "${VENV}"; \
@@ -166,17 +164,16 @@ RUN { set -eux; \
     chown -R abc:abc .; \
     chroot --userspec=abc / "${VENV}/bin/pip" install -r "${VENV}/src/requirements.txt"; \
     \
-    # TODO: this is wrong. look at /opt/$APP/src/bin/$APP. they need an actual setup.py
-    ln -sfv "${VENV}/bin/${APP}" /usr/local/bin/; \
+    keeper-helper "$APP" --help; \
 }
 
 # https://github.com/makerdao/market-maker-keeper (and etherdelta-client)
 RUN { set -eux; \
     \
-    export APP=market-maker-keeper; \
-    export GIT_HASH=3f0b2016f186c6c53651143db1e3a2ea6574526d; \
+    APP=market-maker-keeper; \
+    GIT_HASH=3f0b2016f186c6c53651143db1e3a2ea6574526d; \
     \
-    export VENV="/opt/$APP"; \
+    VENV="/opt/$APP"; \
     \
     mkdir -p "${VENV}"; \
     chown abc:abc "${VENV}"; \
@@ -190,20 +187,16 @@ RUN { set -eux; \
     chown -R abc:abc .; \
     chroot --userspec=abc / "${VENV}/bin/pip" install -r "${VENV}/src/requirements.txt"; \
     \
-    cd "$VENV/bin"; \
-    for x in *-keeper; do \
-      ln -sfv "$(pwd)/$x" /usr/local/bin/; \
-    done; \
-    for x in *-cancel; do \
-      ln -sfv "$(pwd)/$x" /usr/local/bin/; \
-    done; \
-    cd -; \
-    \
     # etherdelta-client for placing orders on EtherDelta using socket.io
     cd ./lib/pymaker/utils/etherdelta-client; \
     npm install; \
+    # TODO: this doesn't seem to install anything onto the path. is this correct?
+    \
+    # TODO: run help for all the -keeper and -cancel and any other scripts
+    APP=$APP keeper-helper oasis-market-maker-keeper --help; \
 }
 
+# how big are these layers? should we copy nix stuff earlier?
 COPY --from=dapptools /root/.nix-profile /root/.nix-profile
 COPY --from=dapptools /nix /nix
 COPY --from=dapptools /root/.dapp/dapptools /root/.dapp/dapptools

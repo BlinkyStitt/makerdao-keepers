@@ -1,0 +1,18 @@
+#!/bin/bash
+# i don't love this, but it works
+# usage: keeper-helper plunger --helper
+# usage: APP=market-maker-keeper keeper-helper oasis-market-maker-keeper --help
+
+if [ -n "$APP" ]; then
+  app=$APP
+else
+  app=$1
+  # notice that we do NOT shift here.
+fi
+
+# enter the virtualenv so that when their script calls pyhon, it calls the right python
+. "/opt/${app}/bin/activate"
+
+export PATH="/opt/${app}/src/bin:$PATH"
+
+exec "$@"
