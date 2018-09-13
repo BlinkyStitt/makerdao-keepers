@@ -2,6 +2,7 @@ FROM gitlab.stytt.com:5001/docker/linux-nix/ubuntu as nix-builder
 
 # https://github.com/dapphub/dapptools
 # TODO: pin specific version
+# TODO: this takes a long time to build, but i couldn't get cachix to work and it needs auth (use --build-arg)
 RUN { set -eux; \
     \
     export GNUPGHOME="$(mktemp -d -p /tmp)"; \
