@@ -1,8 +1,34 @@
+FROM gitlab.stytt.com:5001/docker/linux-nix/ubuntu as nix-builder
+
+# https://github.com/dapphub/dapptools
+# TODO: pin specific version
+RUN { set -eux; \
+    \
+    export GNUPGHOME="$(mktemp -d -p /tmp)"; \
+    export MANPATH=""; \
+    . /root/.nix-profile/etc/profile.d/nix.sh; \
+    \
+    # dapp, seth, solc, hevm, ethsign (and also jshon)
+    git clone --depth 1 --recursive https://github.com/dapphub/dapptools $HOME/.dapp/dapptools; \
+    nix-env -f $HOME/.dapp/dapptools -iA dapp ethsign hevm seth solc token ; \
+    \
+    # dai
+    cd "$HOME/.dapp/dapptools/submodules/dai-cli"; \
+    make link; \
+    \
+    # setzer for price feeds for market-maker-keeper
+    cd "$HOME/.dapp/dapptools/submodules/setzer"; \
+    make link; \
+    \
+    # terra
+    cd "$HOME/.dapp/dapptools/submodules/terra"; \
+    make link; \
+    \
+    rm -rf /tmp/*; \
+}
+
 # this image could definitely be smaller and build faster, but lets just get it working
 FROM gitlab.stytt.com:5001/docker/python3/ubuntu-s6
-
-# for nix. it doesn't officially support installing as root, but it works
-ENV USER root
 
 RUN docker-install \
     autoconf \
@@ -42,57 +68,7 @@ RUN { set -eux; \
     rm -rf /tmp/*; \
 }
 
-# nix is really bigger than I want here, but its the simplest way to install dapptools
-ENV NIX_GPG B541D55301270E0BCF15CA5D8170B4726D7198DE
-ENV NIX_VERSION 2.1.1
-RUN { set -eux; \
-    \
-    cd /tmp; \
-    export GNUPGHOME="$(mktemp -d -p /tmp)"; \
-    \
-    groupadd -r nixbld; \
-    for n in $(seq 1 10); do \
-      useradd -c "Nix build user $n" -d /var/empty -g nixbld -G nixbld -M -N -r -s "$(which nologin)" nixbld$n; \
-    done; \
-    \
-    curl -o install-nix-${NIX_VERSION} https://nixos.org/nix/install; \
-    curl -o install-nix-${NIX_VERSION}.sig https://nixos.org/nix/install.sig; \
-    gpg2 --keyserver pgp.mit.edu --recv-keys $NIX_GPG; \
-    gpg2 --verify ./install-nix-${NIX_VERSION}.sig; \
-    sh ./install-nix-${NIX_VERSION}; \
-    \
-    rm -rf /tmp/*; \
-}
-
-# https://github.com/dapphub/dapptools
-# TODO: pin specific version
-RUN { set -eux; \
-    \
-    export GNUPGHOME="$(mktemp -d -p /tmp)"; \
-    export MANPATH=""; \
-    . /root/.nix-profile/etc/profile.d/nix.sh; \
-    \
-    # dapp, seth, solc, hevm, ethsign (and also jshon)
-    git clone --depth 1 --recursive https://github.com/dapphub/dapptools $HOME/.dapp/dapptools; \
-    nix-env -f $HOME/.dapp/dapptools -iA dapp ethsign hevm seth solc token ; \
-    \
-    # dai
-    cd "$HOME/.dapp/dapptools/submodules/dai-cli"; \
-    make link; \
-    \
-    # setzer for price feeds for market-maker-keeper
-    cd "$HOME/.dapp/dapptools/submodules/setzer"; \
-    make link; \
-    \
-    # terra
-    cd "$HOME/.dapp/dapptools/submodules/terra"; \
-    make link; \
-    \
-    rm -rf /tmp/*; \
-}
-
 # https://github.com/makerdao/tx-manager
-# TODO: fetch with curl instead?
 RUN { set -eux; \
     \
     git clone --depth 1 https://github.com/makerdao/tx-manager /opt/contracts/tx-manager; \
@@ -121,6 +97,7 @@ RUN { set -eux; \
     chown -R abc:abc .; \
     chroot --userspec=abc / "${VENV}/bin/pip" install -r "${VENV}/src/requirements.txt"; \
     \
+    # TODO: this is wrong. look at /opt/$APP/src/bin/$APP. they need an actual setup.py
     ln -sfv "${VENV}/bin/${APP}" /usr/local/bin/; \
 }
 
@@ -144,6 +121,7 @@ RUN { set -eux; \
     chown -R abc:abc .; \
     chroot --userspec=abc / "${VENV}/bin/pip" install -r "${VENV}/src/requirements.txt"; \
     \
+    # TODO: this is wrong. look at /opt/$APP/src/bin/$APP. they need an actual setup.py
     ln -sfv "${VENV}/bin/${APP}" /usr/local/bin/; \
 }
 
@@ -167,6 +145,7 @@ RUN { set -eux; \
     chown -R abc:abc .; \
     chroot --userspec=abc / "${VENV}/bin/pip" install -r "${VENV}/src/requirements.txt"; \
     \
+    # TODO: this is wrong. look at /opt/$APP/src/bin/$APP. they need an actual setup.py
     ln -sfv "${VENV}/bin/${APP}" /usr/local/bin/; \
 }
 
@@ -190,6 +169,7 @@ RUN { set -eux; \
     chown -R abc:abc .; \
     chroot --userspec=abc / "${VENV}/bin/pip" install -r "${VENV}/src/requirements.txt"; \
     \
+    # TODO: this is wrong. look at /opt/$APP/src/bin/$APP. they need an actual setup.py
     ln -sfv "${VENV}/bin/${APP}" /usr/local/bin/; \
 }
 
@@ -213,6 +193,7 @@ RUN { set -eux; \
     chown -R abc:abc .; \
     chroot --userspec=abc / "${VENV}/bin/pip" install -r "${VENV}/src/requirements.txt"; \
     \
+    # TODO: this is wrong. look at /opt/$APP/src/bin/$APP. they need an actual setup.py
     ln -sfv "${VENV}/bin/${APP}" /usr/local/bin/; \
 }
 
@@ -237,15 +218,22 @@ RUN { set -eux; \
     chroot --userspec=abc / "${VENV}/bin/pip" install -r "${VENV}/src/requirements.txt"; \
     \
     cd "$VENV/bin"; \
-    for x in *-keeper *-cancel; do \
+    for x in *-keeper; do \
+      ln -sfv "$(pwd)/$x" /usr/local/bin/; \
+    done; \
+    for x in *-cancel; do \
       ln -sfv "$(pwd)/$x" /usr/local/bin/; \
     done; \
     cd -; \
     \
-    # etherdelta-client
+    # etherdelta-client for placing orders on EtherDelta using socket.io
+    cd ./lib/pymaker/utils/etherdelta-client
     npm install; \
-    \
-    ln -sfv "$(pwd)/node_modules/.bin/etherdelta-client" /usr/local/bin/; \
 }
+
+COPY --from=nix-builder /root/.nix-profile /root/.nix-profile
+COPY --from=nix-builder /nix /nix
+COPY --from=nix-builder /root/.dapp/dapptools /root/.dapp/dapptools
+COPY --from=nix-builder /usr/local/bin /usr/local/bin
 
 COPY rootfs/ /
