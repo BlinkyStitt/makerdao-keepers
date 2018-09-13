@@ -227,7 +227,7 @@ RUN { set -eux; \
     cd -; \
     \
     # etherdelta-client for placing orders on EtherDelta using socket.io
-    cd ./lib/pymaker/utils/etherdelta-client
+    cd ./lib/pymaker/utils/etherdelta-client; \
     npm install; \
 }
 
