@@ -1,32 +1,4 @@
-FROM gitlab.stytt.com:5001/docker/linux-nix/ubuntu as nix-builder
-
-# https://github.com/dapphub/dapptools
-# TODO: pin specific version
-# TODO: this takes a long time to build, but i couldn't get cachix to work and it needs auth (use --build-arg)
-RUN { set -eux; \
-    \
-    export GNUPGHOME="$(mktemp -d -p /tmp)"; \
-    export MANPATH=""; \
-    . /root/.nix-profile/etc/profile.d/nix.sh; \
-    \
-    # dapp, seth, solc, hevm, ethsign (and also jshon)
-    git clone --depth 1 --recursive https://github.com/dapphub/dapptools $HOME/.dapp/dapptools; \
-    nix-env -f $HOME/.dapp/dapptools -iA dapp ethsign hevm seth solc token ; \
-    \
-    # dai
-    cd "$HOME/.dapp/dapptools/submodules/dai-cli"; \
-    make link; \
-    \
-    # setzer for price feeds for market-maker-keeper
-    cd "$HOME/.dapp/dapptools/submodules/setzer"; \
-    make link; \
-    \
-    # terra
-    cd "$HOME/.dapp/dapptools/submodules/terra"; \
-    make link; \
-    \
-    rm -rf /tmp/*; \
-}
+FROM gitlab.stytt.com:5001/docker/dapptools as dapptools
 
 # this image could definitely be smaller and build faster, but lets just get it working
 FROM gitlab.stytt.com:5001/docker/python3/ubuntu-s6
@@ -232,9 +204,9 @@ RUN { set -eux; \
     npm install; \
 }
 
-COPY --from=nix-builder /root/.nix-profile /root/.nix-profile
-COPY --from=nix-builder /nix /nix
-COPY --from=nix-builder /root/.dapp/dapptools /root/.dapp/dapptools
-COPY --from=nix-builder /usr/local/bin /usr/local/bin
+COPY --from=dapptools /root/.nix-profile /root/.nix-profile
+COPY --from=dapptools /nix /nix
+COPY --from=dapptools /root/.dapp/dapptools /root/.dapp/dapptools
+COPY --from=dapptools /usr/local/bin /usr/local/bin
 
 COPY rootfs/ /
