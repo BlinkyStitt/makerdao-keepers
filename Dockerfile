@@ -202,9 +202,11 @@ COPY --from=dapptools /root/.nix-profile /root/.nix-profile
 COPY --from=dapptools /nix /nix
 COPY --from=dapptools /root/.dapp/dapptools /root/.dapp/dapptools
 COPY --from=dapptools /usr/local/bin /usr/local/bin
+COPY --from=dapptools /root/.profile /root/.profile
 
 # this is needed by profile.d/nix.sh
 ENV USER root
-RUN . /root/.nix-profile/etc/profile.d/nix.sh
+# make sure dapp is actually on the path
+RUN bash -l dapp --help
 
 COPY rootfs/ /
