@@ -50,7 +50,7 @@ RUN { set -eux; \
     git reset --hard 754a6da46d25862983ebf2c19eb70632b46896f5; \
 }
 
-COPY /rootfs/bin/keeper-helper /bin/
+COPY /rootfs/bin/makerdao-helper /bin/
 
 # https://github.com/makerdao/plunger
 # run this before starting any of the keepers since pending transactions can break things!
@@ -73,7 +73,7 @@ RUN { set -eux; \
     chown -R abc:abc .; \
     chroot --userspec=abc / "${VENV}/bin/pip" install -r "${VENV}/src/requirements.txt"; \
     \
-    keeper-helper "$APP" --help; \
+    makerdao-helper "$APP" --help; \
 }
 
 # https://github.com/makerdao/arbitrage-keeper
@@ -96,7 +96,7 @@ RUN { set -eux; \
     chown -R abc:abc .; \
     chroot --userspec=abc / "${VENV}/bin/pip" install -r "${VENV}/src/requirements.txt"; \
     \
-    keeper-helper "$APP" --help; \
+    makerdao-helper "$APP" --help; \
 }
 
 # https://github.com/makerdao/auction-keeper
@@ -119,7 +119,7 @@ RUN { set -eux; \
     chown -R abc:abc .; \
     chroot --userspec=abc / "${VENV}/bin/pip" install -r "${VENV}/src/requirements.txt"; \
     \
-    keeper-helper "$APP" --help; \
+    makerdao-helper "$APP" --help; \
 }
 
 # https://github.com/makerdao/bite-keeper
@@ -142,7 +142,7 @@ RUN { set -eux; \
     chown -R abc:abc .; \
     chroot --userspec=abc / "${VENV}/bin/pip" install -r "${VENV}/src/requirements.txt"; \
     \
-    keeper-helper "$APP" --help; \
+    makerdao-helper "$APP" --help; \
 }
 
 # https://github.com/makerdao/cdp-keeper
@@ -165,7 +165,7 @@ RUN { set -eux; \
     chown -R abc:abc .; \
     chroot --userspec=abc / "${VENV}/bin/pip" install -r "${VENV}/src/requirements.txt"; \
     \
-    keeper-helper "$APP" --help; \
+    makerdao-helper "$APP" --help; \
 }
 
 # https://github.com/makerdao/market-maker-keeper (and etherdelta-client)
@@ -194,16 +194,16 @@ RUN { set -eux; \
     # TODO: this doesn't seem to install anything onto the path. is this correct?
     \
     # TODO: run help for all the -keeper and -cancel and any other scripts
-    APP="$APP" keeper-helper oasis-market-maker-keeper --help; \
+    APP="$APP" makerdao-helper oasis-market-maker-keeper --help; \
 }
 
 # how big are these layers? should we copy nix stuff earlier?
-# TODO: this is missing something. dapp isn't on the path even when starting a login shell
 COPY --from=dapptools /root/.nix-profile /root/.nix-profile
 COPY --from=dapptools /nix /nix
 COPY --from=dapptools /root/.dapp/dapptools /root/.dapp/dapptools
 COPY --from=dapptools /usr/local/bin /usr/local/bin
 
+# this is needed by profile.d/nix.sh
 ENV USER root
 RUN . /root/.nix-profile/etc/profile.d/nix.sh
 

@@ -1,8 +1,8 @@
 #!/bin/bash
 # enter the correct virtualenv before running the command and add rpc flags
 # i don't love this, but it works
-# usage: keeper-helper plunger --helper
-# usage: APP=market-maker-keeper keeper-helper oasis-market-maker-keeper --help
+# usage: makerdao-helper plunger --helper
+# usage: APP=market-maker-keeper makerdao-helper oasis-market-maker-keeper --help
 
 if [ -n "$APP" ]; then
   app=$APP

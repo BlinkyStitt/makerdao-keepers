@@ -9,9 +9,10 @@ fi
 # TODO: wait for consul
 
 # TODO: read addresses out of consul
+ETH_FROM=0x0101010101010101010101010101010101010101
 
 # TODO: make sure transactions aren't stuck
-# keeper-helper plunger --source etherscan,parity_txqueue --wait 0x0101010101010101010101010101010101010101
+# makerdao-helper plunger --source parity_txqueue --wait "$ETH_FROM"
 
 # TODO: how should we pick what keeper to run and with what flags? each should maybe have its own start script
 tail -f /dev/null
