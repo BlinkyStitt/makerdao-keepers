@@ -1,0 +1,15 @@
+Liquidity is important and I want to help.
+
+This image has common commands you'll need to run makerdao keepers.
+
+You'll need a running parity node (for now on kovan testnet) with rpc open to the keepers, but NOT to the internet. This RPC will have unlocked funds and so MUST be protected!
+
+You'll need several accounts and they will need to be unlocked. I need to write more about how many you'll need and how to fund them
+
+I need to connect consul/vault here so we do secrets right. don't just put things in env vars once we are on mainnet!
+consul will also make it simple to build reserved_peers lists
+
+My setup looks like: [p2p network] <-> [geth] <-> [parity] <-> [lots of keepers]
+
+Because of how I installed the various makerdao app's into their own environments, you'll need the makerdao-helper script to get them on the path.
+
