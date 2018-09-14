@@ -204,4 +204,7 @@ COPY --from=dapptools /nix /nix
 COPY --from=dapptools /root/.dapp/dapptools /root/.dapp/dapptools
 COPY --from=dapptools /usr/local/bin /usr/local/bin
 
+ENV USER root
+RUN . /root/.nix-profile/etc/profile.d/nix.sh
+
 COPY rootfs/ /
