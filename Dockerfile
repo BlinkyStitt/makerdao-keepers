@@ -198,6 +198,7 @@ RUN { set -eux; \
 }
 
 # how big are these layers? should we copy nix stuff earlier?
+# TODO: this is missing something. dapp isn't on the path even when starting a login shell
 COPY --from=dapptools /root/.nix-profile /root/.nix-profile
 COPY --from=dapptools /nix /nix
 COPY --from=dapptools /root/.dapp/dapptools /root/.dapp/dapptools

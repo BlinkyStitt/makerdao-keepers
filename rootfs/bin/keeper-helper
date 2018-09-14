@@ -1,4 +1,5 @@
 #!/bin/bash
+# enter the correct virtualenv before running the command and add rpc flags
 # i don't love this, but it works
 # usage: keeper-helper plunger --helper
 # usage: APP=market-maker-keeper keeper-helper oasis-market-maker-keeper --help
@@ -17,4 +18,28 @@ fi
 
 export PATH="/opt/${app}/src/bin:$PATH"
 
-exec "$@"
+cmd=$1
+shift
+
+# TODO: inject --rpc-host and --rpc-port
+# TODO: modify the scripts to read config/environment variables for flags
+cmd_array=(
+    "$cmd"
+)
+
+# add --rpc-host and --rpc-port unless NO_RPC is set to something
+if [ -z "$NO_RPC" ]; then
+  if [ -n "$RPC_HOST" ]; then
+      cmd_array+=(
+          --rpc-host="$RPC_HOST"
+      )
+  fi
+
+  if [ -n "$RPC_PORT" ]; then
+      cmd_array+=(
+          --rpc-port="$RPC_PORT"
+      )
+  fi
+fi
+
+exec "${cmd_array[@]}" "$@"
