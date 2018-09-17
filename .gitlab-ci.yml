@@ -16,7 +16,9 @@ build:
   script:
     # set the date on everything because docker cache's ADD/COPY by modification time
     - find . -exec touch -t 201801010000 {} \;
-    # docker build and push
+    # try to pull the latest for --build-cache
+    - docker pull "$CI_REGISTRY_IMAGE:latest" || true
+    # build and push
     - docker build . --force-rm --build-arg FTP_PROXY="$FTP_PROXY" --build-arg HTTP_PROXY="$HTTP_PROXY" --build-arg HTTPS_PROXY="$HTTPS_PROXY" --pull --cache-from "${CI_REGISTRY_IMAGE}:latest" -t "${CI_REGISTRY_IMAGE}:${CI_COMMIT_SHA}"
     - docker push "${CI_REGISTRY_IMAGE}:${CI_COMMIT_SHA}"
 
