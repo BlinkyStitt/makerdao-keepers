@@ -1,18 +1,31 @@
 #!/usr/bin/with-contenv bash
 # TODO: actually start the keeper here
+set -eux
 
-if [ -z "$RPC_HOST" ]; then
-    echo "RPC_HOST not set"
-    exit 1
-fi
+echo "RPC_HOST: ${RPC_HOST}"
+echo "RPC_PORT: ${RPC_PORT:-}"
 
 # TODO: wait for consul
 
-# TODO: read addresses out of consul
-ETH_FROM=0x0101010101010101010101010101010101010101
+# TODO: read ETH_FROM address out of consul?
+echo "ETH_FROM: ${ETH_FROM}"
 
-# TODO: make sure transactions aren't stuck
-# makerdao-helper plunger --source parity_txqueue --wait "$ETH_FROM"
+# make sure transactions aren't stuck
+# TODO: next version of plunger removes the source flag since parity_txqueue is the only option
+makerdao-helper plunger --source parity_txqueue --wait "$ETH_FROM"
 
-# TODO: how should we pick what keeper to run and with what flags? each should maybe have its own start script
-tail -f /dev/null
+# TODO: don't run as root
+case "$KEEPER" in
+        arbitrage)
+            exec run-arbitrage-keeper
+            ;;
+
+        auction|bite|cdp|market-maker)
+            echo "Keeper help not yet written"
+            exit 1
+            ;;
+
+        *)
+            echo "Unknown keeper"
+            exit 1
+esac
