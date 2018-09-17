@@ -1,8 +1,5 @@
 #!/bin/bash
 set -eux
-
-# TODO: tx-manager shouldn't be optional
-# TODO:
 exec makerdao-helper arbitrage-keeper \
   --eth-from "$ETH_FROM" \
   --tub-address "$TUB_ADDRESS" \
@@ -10,37 +7,8 @@ exec makerdao-helper arbitrage-keeper \
   --oasis-address "$OASIS_ADDRESS" \
   --oasis-support-address "${OASIS_SUPPORT_ADDRESS:-}" \
   --tx-manager "${TX_MANAGER:-}" \
-  --debug \
+  --base-token "$BASE_TOKEN" \
   --min-profit "${MIN_PROFIT}" \
   --max-engagement "${MAX_ENGAGEMENT}" \
+  --debug \
 ;
-
-
-usage: arbitrage-keeper [-h] [--rpc-host RPC_HOST] [--rpc-port RPC_PORT]
-                        [--rpc-timeout RPC_TIMEOUT] --eth-from ETH_FROM
-                        --tub-address TUB_ADDRESS --tap-address TAP_ADDRESS
-                        --oasis-address OASIS_ADDRESS
-                        [--oasis-support-address OASIS_SUPPORT_ADDRESS]
-                        [--tx-manager TX_MANAGER] [--gas-price GAS_PRICE]
-                        --base-token BASE_TOKEN --min-profit MIN_PROFIT
-                        --max-engagement MAX_ENGAGEMENT
-                        [--max-errors MAX_ERRORS] [--debug]
-
-  --tx-manager TX_MANAGER
-                        Ethereum address of the TxManager contract to use for
-                        multi-step arbitrage
-  --gas-price GAS_PRICE
-                        Gas price in Wei (default: node default)
-  --base-token BASE_TOKEN
-                        The token all arbitrage sequences will start and end
-                        with
-  --min-profit MIN_PROFIT
-                        Minimum profit (in base token) from one arbitrage
-                        operation
-  --max-engagement MAX_ENGAGEMENT
-                        Maximum engagement (in base token) in one arbitrage
-                        operation
-  --max-errors MAX_ERRORS
-                        Maximum number of allowed errors before the keeper
-                        terminates (default: 100)
-  --debug               Enable debug output
