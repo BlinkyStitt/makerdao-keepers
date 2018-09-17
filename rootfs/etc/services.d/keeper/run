@@ -17,7 +17,17 @@ makerdao-helper plunger --source parity_txqueue --wait "$ETH_FROM"
 # TODO: don't run as root
 case "$KEEPER" in
         arbitrage)
-            exec run-arbitrage-keeper
+            exec makerdao-helper arbitrage-keeper \
+              --eth-from "$ETH_FROM" \
+              --tub-address "$TUB_ADDRESS" \
+              --tap-address "$TAP_ADDRESS" \
+              --oasis-address "$OASIS_ADDRESS" \
+              --oasis-support-address "${OASIS_SUPPORT_ADDRESS:-}" \
+              --tx-manager "${TX_MANAGER:-}" \
+              --base-token "$BASE_TOKEN" \
+              --min-profit "${MIN_PROFIT}" \
+              --max-engagement "${MAX_ENGAGEMENT}" \
+            ;
             ;;
 
         auction|bite|cdp|market-maker)
