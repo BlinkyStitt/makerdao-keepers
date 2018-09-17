@@ -11,7 +11,7 @@ exec makerdao-helper arbitrage-keeper \
   --oasis-support-address "${OASIS_SUPPORT_ADDRESS:-}" \
   --tx-manager "${TX_MANAGER:-}" \
   --debug \
-  --min-profit "${MIN_PROFIX}" \
+  --min-profit "${MIN_PROFIT}" \
   --max-engagement "${MAX_ENGAGEMENT}" \
 ;
 
