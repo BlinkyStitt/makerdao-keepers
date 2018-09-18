@@ -113,10 +113,15 @@ RUN { set -eux; \
 # https://github.com/makerdao/tx-manager
 RUN { set -eux; \
     \
+    export MANPATH=""; \
+    . /root/.nix-profile/etc/profile.d/nix.sh; \
+    \
     git clone https://github.com/makerdao/tx-manager /opt/contracts/tx-manager; \
     cd /opt/contracts/tx-manager; \
     git reset --hard 754a6da46d25862983ebf2c19eb70632b46896f5; \
     git submodule update --init --recursive; \
+    # build now so we can be sure that dapp and our tx-manager code work
+    dapp build; \
 }
 
 # TODO: copy /rootfs/bin/makerdao-installer script?
