@@ -16,26 +16,33 @@ makerdao-helper plunger --source parity_txqueue --wait "$ETH_FROM"
 
 # TODO: don't run as root
 case "$KEEPER" in
-        arbitrage)
-            exec makerdao-helper arbitrage-keeper \
-              --eth-from "$ETH_FROM" \
-              --tub-address "$TUB_ADDRESS" \
-              --tap-address "$TAP_ADDRESS" \
-              --oasis-address "$OASIS_ADDRESS" \
-              --oasis-support-address "${OASIS_SUPPORT_ADDRESS:-}" \
-              --tx-manager "${TX_MANAGER:-}" \
-              --base-token "$BASE_TOKEN" \
-              --min-profit "${MIN_PROFIT}" \
-              --max-engagement "${MAX_ENGAGEMENT}" \
-            ;
-            ;;
+  arbitrage)
+    exec makerdao-helper arbitrage-keeper \
+      --eth-from "$ETH_FROM" \
+      --tub-address "$TUB_ADDRESS" \
+      --tap-address "$TAP_ADDRESS" \
+      --oasis-address "$OASIS_ADDRESS" \
+      --oasis-support-address "${OASIS_SUPPORT_ADDRESS:-}" \
+      --tx-manager "${TX_MANAGER:-}" \
+      --base-token "$BASE_TOKEN" \
+      --min-profit "${MIN_PROFIT}" \
+      --max-engagement "${MAX_ENGAGEMENT}" \
+    ;
+    ;;
 
-        auction|bite|cdp|market-maker)
-            echo "Keeper help not yet written"
-            exit 1
-            ;;
+  auction|cdp|market-maker)
+    echo "Keeper help not yet written"
+    exit 1
+    ;;
 
-        *)
-            echo "Unknown keeper"
-            exit 1
+  bite)
+    exec makerdao-helper bite-keeper \
+      --eth-from "$ETH_FROM" \
+      --tub-address "$TUB_ADDRESS" \
+    ;
+  ;;
+
+  *)
+      echo "Unknown keeper"
+      exit 1
 esac
