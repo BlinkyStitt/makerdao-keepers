@@ -101,102 +101,102 @@ RUN { set -eux; \
 }
 
 # https://github.com/makerdao/auction-keeper
-#RUN { set -eux; \
-#    \
-#    APP=auction-keeper; \
-#    GIT_HASH=19cda06d5bbc9d61e01979f3c40e6bafd9d8b570; \
-#    \
-#    VENV="/opt/$APP"; \
-#    \
-#    mkdir -p "${VENV}"; \
-#    chown abc:abc "${VENV}"; \
-#    chroot --userspec=abc / python3.6 -m venv "${VENV}"; \
-#    chroot --userspec=abc / "${VENV}/bin/pip" install -U setuptools pip; \
-#    \
-#    git clone https://github.com/makerdao/${APP}.git "${VENV}/src"; \
-#    cd "${VENV}/src"; \
-#    git reset --hard "$GIT_HASH"; \
-#    git submodule update --init --recursive; \
-#    chown -R abc:abc .; \
-#    chroot --userspec=abc / "${VENV}/bin/pip" install -r "${VENV}/src/requirements.txt"; \
-#    \
-#    makerdao-helper "$APP" --help; \
-#}
+RUN { set -eux; \
+    \
+    APP=auction-keeper; \
+    GIT_HASH=19cda06d5bbc9d61e01979f3c40e6bafd9d8b570; \
+    \
+    VENV="/opt/$APP"; \
+    \
+    mkdir -p "${VENV}"; \
+    chown abc:abc "${VENV}"; \
+    chroot --userspec=abc / python3.6 -m venv "${VENV}"; \
+    chroot --userspec=abc / "${VENV}/bin/pip" install -U setuptools pip; \
+    \
+    git clone https://github.com/makerdao/${APP}.git "${VENV}/src"; \
+    cd "${VENV}/src"; \
+    git reset --hard "$GIT_HASH"; \
+    git submodule update --init --recursive; \
+    chown -R abc:abc .; \
+    chroot --userspec=abc / "${VENV}/bin/pip" install -r "${VENV}/src/requirements.txt"; \
+    \
+    makerdao-helper "$APP" --help; \
+}
 
 # https://github.com/makerdao/bite-keeper
-#RUN { set -eux; \
-#    \
-#    APP=bite-keeper; \
-#    GIT_HASH=e606456115cab88636a88a1ff403a81dd80cca77; \
-#    \
-#    VENV="/opt/$APP"; \
-#    \
-#    mkdir -p "${VENV}"; \
-#    chown abc:abc "${VENV}"; \
-#    chroot --userspec=abc / python3.6 -m venv "${VENV}"; \
-#    chroot --userspec=abc / "${VENV}/bin/pip" install -U setuptools pip; \
-#    \
-#    git clone https://github.com/makerdao/${APP}.git "${VENV}/src"; \
-#    cd "${VENV}/src"; \
-#    git reset --hard "$GIT_HASH"; \
-#    git submodule update --init --recursive; \
-#    chown -R abc:abc .; \
-#    chroot --userspec=abc / "${VENV}/bin/pip" install -r "${VENV}/src/requirements.txt"; \
-#    \
-#    makerdao-helper "$APP" --help; \
-#}
+RUN { set -eux; \
+    \
+    APP=bite-keeper; \
+    GIT_HASH=e606456115cab88636a88a1ff403a81dd80cca77; \
+    \
+    VENV="/opt/$APP"; \
+    \
+    mkdir -p "${VENV}"; \
+    chown abc:abc "${VENV}"; \
+    chroot --userspec=abc / python3.6 -m venv "${VENV}"; \
+    chroot --userspec=abc / "${VENV}/bin/pip" install -U setuptools pip; \
+    \
+    git clone https://github.com/makerdao/${APP}.git "${VENV}/src"; \
+    cd "${VENV}/src"; \
+    git reset --hard "$GIT_HASH"; \
+    git submodule update --init --recursive; \
+    chown -R abc:abc .; \
+    chroot --userspec=abc / "${VENV}/bin/pip" install -r "${VENV}/src/requirements.txt"; \
+    \
+    makerdao-helper "$APP" --help; \
+}
 
 # https://github.com/makerdao/cdp-keeper
-#RUN { set -eux; \
-#    \
-#    APP=cdp-keeper; \
-#    GIT_HASH=4396f0483b4109701cc292dc175360b8a0f00e3e; \
-#    \
-#    VENV="/opt/$APP"; \
-#    \
-#    mkdir -p "${VENV}"; \
-#    chown abc:abc "${VENV}"; \
-#    chroot --userspec=abc / python3.6 -m venv "${VENV}"; \
-#    chroot --userspec=abc / "${VENV}/bin/pip" install -U setuptools pip; \
-#    \
-#    git clone https://github.com/makerdao/${APP}.git "${VENV}/src"; \
-#    cd "${VENV}/src"; \
-#    git reset --hard "$GIT_HASH"; \
-#    git submodule update --init --recursive; \
-#    chown -R abc:abc .; \
-#    chroot --userspec=abc / "${VENV}/bin/pip" install -r "${VENV}/src/requirements.txt"; \
-#    \
-#    makerdao-helper "$APP" --help; \
-#}
+RUN { set -eux; \
+    \
+    APP=cdp-keeper; \
+    GIT_HASH=4396f0483b4109701cc292dc175360b8a0f00e3e; \
+    \
+    VENV="/opt/$APP"; \
+    \
+    mkdir -p "${VENV}"; \
+    chown abc:abc "${VENV}"; \
+    chroot --userspec=abc / python3.6 -m venv "${VENV}"; \
+    chroot --userspec=abc / "${VENV}/bin/pip" install -U setuptools pip; \
+    \
+    git clone https://github.com/makerdao/${APP}.git "${VENV}/src"; \
+    cd "${VENV}/src"; \
+    git reset --hard "$GIT_HASH"; \
+    git submodule update --init --recursive; \
+    chown -R abc:abc .; \
+    chroot --userspec=abc / "${VENV}/bin/pip" install -r "${VENV}/src/requirements.txt"; \
+    \
+    makerdao-helper "$APP" --help; \
+}
 
 # https://github.com/makerdao/market-maker-keeper (and etherdelta-client)
-#RUN { set -eux; \
-#    \
-#    APP=market-maker-keeper; \
-#    GIT_HASH=3f0b2016f186c6c53651143db1e3a2ea6574526d; \
-#    \
-#    VENV="/opt/$APP"; \
-#    \
-#    mkdir -p "${VENV}"; \
-#    chown abc:abc "${VENV}"; \
-#    chroot --userspec=abc / python3.6 -m venv "${VENV}"; \
-#    chroot --userspec=abc / "${VENV}/bin/pip" install -U setuptools pip; \
-#    \
-#    git clone https://github.com/makerdao/${APP}.git "${VENV}/src"; \
-#    cd "${VENV}/src"; \
-#    git reset --hard "$GIT_HASH"; \
-#    git submodule update --init --recursive; \
-#    chown -R abc:abc .; \
-#    chroot --userspec=abc / "${VENV}/bin/pip" install -r "${VENV}/src/requirements.txt"; \
-#    \
-#    # etherdelta-client for placing orders on EtherDelta using socket.io
-#    cd ./lib/pymaker/utils/etherdelta-client; \
-#    npm install; \
-#    # TODO: this doesn't seem to install anything onto the path. is this correct?
-#    \
-#    # TODO: run help for all the -keeper and -cancel and any other scripts
-#    APP="$APP" makerdao-helper oasis-market-maker-keeper --help; \
-#}
+RUN { set -eux; \
+    \
+    APP=market-maker-keeper; \
+    GIT_HASH=3f0b2016f186c6c53651143db1e3a2ea6574526d; \
+    \
+    VENV="/opt/$APP"; \
+    \
+    mkdir -p "${VENV}"; \
+    chown abc:abc "${VENV}"; \
+    chroot --userspec=abc / python3.6 -m venv "${VENV}"; \
+    chroot --userspec=abc / "${VENV}/bin/pip" install -U setuptools pip; \
+    \
+    git clone https://github.com/makerdao/${APP}.git "${VENV}/src"; \
+    cd "${VENV}/src"; \
+    git reset --hard "$GIT_HASH"; \
+    git submodule update --init --recursive; \
+    chown -R abc:abc .; \
+    chroot --userspec=abc / "${VENV}/bin/pip" install -r "${VENV}/src/requirements.txt"; \
+    \
+    # etherdelta-client for placing orders on EtherDelta using socket.io
+    cd ./lib/pymaker/utils/etherdelta-client; \
+    npm install; \
+    # TODO: this doesn't seem to install anything onto the path. is this correct?
+    \
+    # TODO: run help for all the -keeper and -cancel and any other scripts
+    APP="$APP" makerdao-helper oasis-market-maker-keeper --help; \
+}
 
 # how big are these layers? should we copy nix stuff earlier?
 COPY --from=dapptools /root/.nix-profile /root/.nix-profile
