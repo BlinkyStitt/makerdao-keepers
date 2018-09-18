@@ -80,24 +80,35 @@ RUN { set -eux; \
     nix-env -iA cachix -f https://github.com/NixOS/nixpkgs/tarball/1d4de0d552ae9aa66a5b8dee5fb0650a4372d148; \
 }
 
+# we could use `nix-channel --add https://nix.dapphub.com/pkgs/dapphub`, but I think my firewall is having troubles with this domain
 RUN { set -eux; \
     \
     export GNUPGHOME="$(mktemp -d -p /tmp)"; \
     export MANPATH=""; \
     . /root/.nix-profile/etc/profile.d/nix.sh; \
     \
-    nix-channel --add https://nix.dapphub.com/pkgs/dapphub; \
-    nix-channel --update; \
     # install binaries instead of building from source (which takes a very long time)
     cachix use dapp; \
-    # install pinned versions
-    nix-env -iA dapphub.{dapp-0.9.0,ethsign-0.10,hevm-0.15,seth-0.6.3,solc-0.4.24,token-0.5.1}; \
+    # dapp, seth, solc, hevm, ethsign (and also jshon)
+    # TODO: clone a specific hash here
+    git clone --depth 1 --recursive https://github.com/dapphub/dapptools $HOME/.dapp/dapptools; \
+    nix-env -f $HOME/.dapp/dapptools -iA dapp ethsign hevm jshon seth solc token ; \
     \
-    # https://github.com/makerdao/setzer - price feeds for market-maker-keeper
+    # dai
+    cd "$HOME/.dapp/dapptools/submodules/dai-cli"; \
+    make link; \
+    \
+    # setzer for price feeds for market-maker-keeper
+    cd "$HOME/.dapp/dapptools/submodules/setzer"; \
+    make link; \
+    \
+    # terra
+    cd "$HOME/.dapp/dapptools/submodules/terra"; \
+    npm install; \
+    make link; \
+    \
     # https://github.com/makerdao/mcd-cli - makerdao command line interface
-    dapp pkg install dai-cli; \
-    dapp pkg install setzer; \
-    dapp pkg install terra; \
+    # TODO: can we use dapp pkg to install dai and the others, too?
     dapp pkg install mcd; \
     \
     rm -rf /tmp/*; \
