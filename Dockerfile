@@ -51,12 +51,16 @@ RUN { set -eux; \
     git submodule update --init --recursive; \
 }
 
+# TODO: copy /rootfs/bin/makerdao-installer script?
 COPY /rootfs/bin/makerdao-helper /bin/
 
-# https://github.com/makerdao/plunger
-# run this before starting any of the keepers since pending transactions can break things!
+# TODO: i don't love having all these installs in one RUN, but they share a lot of cache
 RUN { set -eux; \
     \
+    PIPCACHE="$(mktemp -d -p /tmp)"; \
+    \
+    # https://github.com/makerdao/plunger
+    # run this before starting any of the keepers since pending transactions can break things!
     APP=plunger; \
     GIT_HASH=38e7a362109296f84fd33265af84013c6dadcc62; \
     \
@@ -65,21 +69,19 @@ RUN { set -eux; \
     mkdir -p "${VENV}"; \
     chown abc:abc "${VENV}"; \
     chroot --userspec=abc / python3.6 -m venv "${VENV}"; \
-    chroot --userspec=abc / "${VENV}/bin/pip" install -U setuptools pip; \
+    chroot --userspec=abc / "${VENV}/bin/pip" install --cache-dir "$PIPCACHE" -U setuptools pip; \
     \
     git clone https://github.com/makerdao/${APP}.git "${VENV}/src"; \
     cd "${VENV}/src"; \
     git reset --hard "$GIT_HASH"; \
     git submodule update --init --recursive; \
     chown -R abc:abc .; \
-    chroot --userspec=abc / "${VENV}/bin/pip" install -r "${VENV}/src/requirements.txt"; \
+    chroot --userspec=abc / "${VENV}/bin/pip" install --cache-dir "$PIPCACHE" -r "${VENV}/src/requirements.txt"; \
     \
     makerdao-helper "$APP" --help; \
-}
-
-# https://github.com/makerdao/arbitrage-keeper
-RUN { set -eux; \
     \
+    \
+    # https://github.com/makerdao/arbitrage-keeper
     APP=arbitrage-keeper; \
     GIT_HASH=0679f30335ac48b96f5e60550c6a49e46612be8a; \
     \
@@ -88,21 +90,19 @@ RUN { set -eux; \
     mkdir -p "${VENV}"; \
     chown abc:abc "${VENV}"; \
     chroot --userspec=abc / python3.6 -m venv "${VENV}"; \
-    chroot --userspec=abc / "${VENV}/bin/pip" install -U setuptools pip; \
+    chroot --userspec=abc / "${VENV}/bin/pip" install --cache-dir "$PIPCACHE" -U setuptools pip; \
     \
     git clone https://github.com/makerdao/${APP}.git "${VENV}/src"; \
     cd "${VENV}/src"; \
     git reset --hard "$GIT_HASH"; \
     git submodule update --init --recursive; \
     chown -R abc:abc .; \
-    chroot --userspec=abc / "${VENV}/bin/pip" install -r "${VENV}/src/requirements.txt"; \
+    chroot --userspec=abc / "${VENV}/bin/pip" install --cache-dir "$PIPCACHE" -r "${VENV}/src/requirements.txt"; \
     \
     makerdao-helper "$APP" --help; \
-}
-
-# https://github.com/makerdao/auction-keeper
-RUN { set -eux; \
     \
+    \
+    # https://github.com/makerdao/auction-keeper
     APP=auction-keeper; \
     GIT_HASH=19cda06d5bbc9d61e01979f3c40e6bafd9d8b570; \
     \
@@ -111,21 +111,19 @@ RUN { set -eux; \
     mkdir -p "${VENV}"; \
     chown abc:abc "${VENV}"; \
     chroot --userspec=abc / python3.6 -m venv "${VENV}"; \
-    chroot --userspec=abc / "${VENV}/bin/pip" install -U setuptools pip; \
+    chroot --userspec=abc / "${VENV}/bin/pip" install --cache-dir "$PIPCACHE" -U setuptools pip; \
     \
     git clone https://github.com/makerdao/${APP}.git "${VENV}/src"; \
     cd "${VENV}/src"; \
     git reset --hard "$GIT_HASH"; \
     git submodule update --init --recursive; \
     chown -R abc:abc .; \
-    chroot --userspec=abc / "${VENV}/bin/pip" install -r "${VENV}/src/requirements.txt"; \
+    chroot --userspec=abc / "${VENV}/bin/pip" install --cache-dir "$PIPCACHE" -r "${VENV}/src/requirements.txt"; \
     \
     makerdao-helper "$APP" --help; \
-}
-
-# https://github.com/makerdao/bite-keeper
-RUN { set -eux; \
     \
+    \
+    # https://github.com/makerdao/bite-keeper
     APP=bite-keeper; \
     GIT_HASH=e606456115cab88636a88a1ff403a81dd80cca77; \
     \
@@ -134,21 +132,19 @@ RUN { set -eux; \
     mkdir -p "${VENV}"; \
     chown abc:abc "${VENV}"; \
     chroot --userspec=abc / python3.6 -m venv "${VENV}"; \
-    chroot --userspec=abc / "${VENV}/bin/pip" install -U setuptools pip; \
+    chroot --userspec=abc / "${VENV}/bin/pip" install --cache-dir "$PIPCACHE" -U setuptools pip; \
     \
     git clone https://github.com/makerdao/${APP}.git "${VENV}/src"; \
     cd "${VENV}/src"; \
     git reset --hard "$GIT_HASH"; \
     git submodule update --init --recursive; \
     chown -R abc:abc .; \
-    chroot --userspec=abc / "${VENV}/bin/pip" install -r "${VENV}/src/requirements.txt"; \
+    chroot --userspec=abc / "${VENV}/bin/pip" install --cache-dir "$PIPCACHE" -r "${VENV}/src/requirements.txt"; \
     \
     makerdao-helper "$APP" --help; \
-}
-
-# https://github.com/makerdao/cdp-keeper
-RUN { set -eux; \
     \
+    \
+    # https://github.com/makerdao/cdp-keeper
     APP=cdp-keeper; \
     GIT_HASH=4396f0483b4109701cc292dc175360b8a0f00e3e; \
     \
@@ -157,21 +153,19 @@ RUN { set -eux; \
     mkdir -p "${VENV}"; \
     chown abc:abc "${VENV}"; \
     chroot --userspec=abc / python3.6 -m venv "${VENV}"; \
-    chroot --userspec=abc / "${VENV}/bin/pip" install -U setuptools pip; \
+    chroot --userspec=abc / "${VENV}/bin/pip" install --cache-dir "$PIPCACHE" -U setuptools pip; \
     \
     git clone https://github.com/makerdao/${APP}.git "${VENV}/src"; \
     cd "${VENV}/src"; \
     git reset --hard "$GIT_HASH"; \
     git submodule update --init --recursive; \
     chown -R abc:abc .; \
-    chroot --userspec=abc / "${VENV}/bin/pip" install -r "${VENV}/src/requirements.txt"; \
+    chroot --userspec=abc / "${VENV}/bin/pip" install --cache-dir "$PIPCACHE" -r "${VENV}/src/requirements.txt"; \
     \
     makerdao-helper "$APP" --help; \
-}
-
-# https://github.com/makerdao/market-maker-keeper (and etherdelta-client)
-RUN { set -eux; \
     \
+    \
+    # https://github.com/makerdao/market-maker-keeper (and etherdelta-client)
     APP=market-maker-keeper; \
     GIT_HASH=3f0b2016f186c6c53651143db1e3a2ea6574526d; \
     \
@@ -180,14 +174,14 @@ RUN { set -eux; \
     mkdir -p "${VENV}"; \
     chown abc:abc "${VENV}"; \
     chroot --userspec=abc / python3.6 -m venv "${VENV}"; \
-    chroot --userspec=abc / "${VENV}/bin/pip" install -U setuptools pip; \
+    chroot --userspec=abc / "${VENV}/bin/pip" install --cache-dir "$PIPCACHE" -U setuptools pip; \
     \
     git clone https://github.com/makerdao/${APP}.git "${VENV}/src"; \
     cd "${VENV}/src"; \
     git reset --hard "$GIT_HASH"; \
     git submodule update --init --recursive; \
     chown -R abc:abc .; \
-    chroot --userspec=abc / "${VENV}/bin/pip" install -r "${VENV}/src/requirements.txt"; \
+    chroot --userspec=abc / "${VENV}/bin/pip" install --cache-dir "$PIPCACHE" -r "${VENV}/src/requirements.txt"; \
     \
     # etherdelta-client for placing orders on EtherDelta using socket.io
     cd ./lib/pymaker/utils/etherdelta-client; \
@@ -196,6 +190,8 @@ RUN { set -eux; \
     \
     # TODO: run help for all the -keeper and -cancel and any other scripts
     APP="$APP" makerdao-helper oasis-market-maker-keeper --help; \
+    \
+    rm -rf /tmp/*; \
 }
 
 # how big are these layers? should we copy nix stuff earlier?
