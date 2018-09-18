@@ -1,9 +1,6 @@
-FROM gitlab.stytt.com:5001/docker/linux-nix/ubuntu as nix
-
 # this image could definitely be smaller and build faster, but lets just get it working
 FROM gitlab.stytt.com:5001/docker/python3/ubuntu-s6
 
-# TODO: i think some of these (sudo for sure) can be removed now that nix stuff is in it's own
 RUN docker-install \
     autoconf \
     automake \
@@ -14,13 +11,17 @@ RUN docker-install \
     dirmngr \
     gcc \
     git \
+    gnupg2 \
     libffi-dev \
     libsecp256k1-dev \
     libssl-dev \
     libtool \
     make \
+    # netbase for cachix use
+    netbase \
     pkg-config \
     python3-dev \
+    # sudo for nix installer
     sudo \
 ;
 
@@ -42,12 +43,42 @@ RUN { set -eux; \
     rm -rf /tmp/*; \
 }
 
-COPY --from=nix /root/.nix-profile /root/.nix-profile
-COPY --from=nix /nix /nix
-COPY --from=nix /root/.profile /root/.profile
+# create groups and build users for nix. i don't love doing this is the main image, but we can optimize later
+RUN { set -eux; \
+    \
+    groupadd -r nixbld; \
+    for n in $(seq 1 10); do \
+      useradd -c "Nix build user $n" -d /var/empty -g nixbld -G nixbld -M -N -r -s "$(which nologin)" "nixbld$n"; \
+    done; \
+}
 
-# this is needed by /root/.nix-profile/etc/profile.d/nix.sh
+# this is needed by nix installer and /root/.nix-profile/etc/profile.d/nix.sh
 ENV USER root
+
+ENV NIX_GPG B541D55301270E0BCF15CA5D8170B4726D7198DE
+ENV NIX_VERSION 2.1.1
+RUN { set -eux; \
+    \
+    cd /tmp; \
+    export GNUPGHOME="$(mktemp -d -p /tmp)"; \
+    \
+    curl -o "install-nix-${NIX_VERSION}" https://nixos.org/nix/install; \
+    curl -o "install-nix-${NIX_VERSION}.sig" https://nixos.org/nix/install.sig; \
+    gpg2 --keyserver keyserver.ubuntu.com --recv-keys $NIX_GPG; \
+    gpg2 --verify ./install-nix-${NIX_VERSION}.sig; \
+    sh ./install-nix-${NIX_VERSION}; \
+    \
+    rm -rf /tmp/*; \
+}
+
+# install cachix since building things from source can take a long time
+RUN { set -eux; \
+    \
+    export MANPATH=""; \
+    . /root/.nix-profile/etc/profile.d/nix.sh; \
+    \
+    nix-env -iA cachix -f https://github.com/NixOS/nixpkgs/tarball/1d4de0d552ae9aa66a5b8dee5fb0650a4372d148; \
+}
 
 # we could use `nix-channel --add https://nix.dapphub.com/pkgs/dapphub`, but we want dai-cli, setzer, and terra clones
 RUN { set -eux; \
