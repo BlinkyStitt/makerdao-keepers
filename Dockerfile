@@ -96,13 +96,15 @@ RUN { set -eux; \
     git submodule update --init --recursive; \
     nix-env -f $HOME/.dapp/dapptools -iA dapp ethsign hevm jshon seth solc token ; \
     \
-    # https://github.com/makerdao/setzer for price feeds for market-maker-keeper
-    # https://github.com/makerdao/mcd-cli - multi-collateral dai command line interface
-    # TODO: can we use dapp pkg to install dai and the others, too?
+    # https://github.com/makerdao/chief
     dapp pkg install chief; \
+    # https://github.com/makerdao/dai-cli - single-collateral dai command line interface
     dapp pkg install dai; \
+    # https://github.com/makerdao/mcd-cli - multi-collateral dai command line interface
     dapp pkg install mcd; \
+    # https://github.com/makerdao/setzer for price feeds for market-maker-keeper
     dapp pkg install setzer; \
+    # https://github.com/makerdao/terra
     dapp pkg install terra; \
     \
     rm -rf /tmp/*; \
