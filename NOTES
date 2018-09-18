@@ -1,0 +1,3 @@
+I still don't know how I want this to work. I think a docker container with a web interface? That would be easy to put behind auth on a secured system. It would be cool to serve the app out of IPFS and not need any servers. People could just open a browser with metamask and start doing arb without any need for docker. How would we want to run it on a server then?
+
+Setup an ethereum node with X accounts. Send ethereum to the first account and scripts move coins around? How long can a chain of unconfirmed transactions get? Does ethereum have child-pays-for-parent calculations with fees?
