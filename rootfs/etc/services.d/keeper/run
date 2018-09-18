@@ -31,8 +31,8 @@ case "$KEEPER" in
     ;;
 
   auction|cdp|market-maker)
-    echo "Keeper help not yet written"
-    exit 1
+    echo "Keeper help not yet written. tailing /dev/null instead."
+    exec tail -f /dev/null
     ;;
 
   bite)
