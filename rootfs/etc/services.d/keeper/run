@@ -43,6 +43,7 @@ case "$KEEPER" in
   ;;
 
   *)
-      echo "Unknown keeper"
-      exit 1
+    echo "Unknown keeper"
+    exit 1
+
 esac
