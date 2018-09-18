@@ -80,10 +80,10 @@ RUN { set -eux; \
     nix-env -iA cachix -f https://github.com/NixOS/nixpkgs/tarball/1d4de0d552ae9aa66a5b8dee5fb0650a4372d148; \
 }
 
+# install dapptools
 # we could use `nix-channel --add https://nix.dapphub.com/pkgs/dapphub`, but I think my firewall is having troubles with this domain
 RUN { set -eux; \
     \
-    export GNUPGHOME="$(mktemp -d -p /tmp)"; \
     export MANPATH=""; \
     . /root/.nix-profile/etc/profile.d/nix.sh; \
     \
@@ -95,6 +95,13 @@ RUN { set -eux; \
     git reset --hard "8770146b1fd14019c4323e3f2c4203de91a2d3b5"; \
     git submodule update --init --recursive; \
     nix-env -f $HOME/.dapp/dapptools -iA dapp ethsign hevm jshon seth solc token ; \
+}
+
+# install more dapptools
+RUN { set -eux; \
+    \
+    export MANPATH=""; \
+    . /root/.nix-profile/etc/profile.d/nix.sh; \
     \
     # https://github.com/makerdao/chief
     dapp pkg install chief; \
@@ -106,8 +113,6 @@ RUN { set -eux; \
     dapp pkg install setzer; \
     # https://github.com/makerdao/terra
     dapp pkg install terra; \
-    \
-    rm -rf /tmp/*; \
 }
 
 # https://github.com/makerdao/tx-manager
