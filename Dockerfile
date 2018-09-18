@@ -92,144 +92,47 @@ RUN { set -eux; \
 }
 
 # TODO: copy /rootfs/bin/makerdao-installer script?
+COPY /rootfs/bin/makerdao-installer /bin/
 COPY /rootfs/bin/makerdao-helper /bin/
 
 # TODO: i don't love having all these installs in one RUN, but they share a lot of cache
 RUN { set -eux; \
     \
-    PIPCACHE="$(chroot --userspec=abc / mktemp -d -p /tmp)"; \
+    export PIPCACHE="$(chroot --userspec=abc / mktemp -d -p /tmp)"; \
     \
     # https://github.com/makerdao/plunger
-    # run this before starting any of the keepers since pending transactions can break things!
-    APP=plunger; \
-    GIT_HASH=38e7a362109296f84fd33265af84013c6dadcc62; \
-    \
-    VENV="/opt/$APP"; \
-    \
-    mkdir -p "${VENV}"; \
-    chown abc:abc "${VENV}"; \
-    chroot --userspec=abc / python3.6 -m venv "${VENV}"; \
-    chroot --userspec=abc / "${VENV}/bin/pip" install --cache-dir "$PIPCACHE" -U setuptools pip; \
-    \
-    git clone https://github.com/makerdao/${APP}.git "${VENV}/src"; \
-    cd "${VENV}/src"; \
-    git reset --hard "$GIT_HASH"; \
-    git submodule update --init --recursive; \
-    chown -R abc:abc .; \
-    chroot --userspec=abc / "${VENV}/bin/pip" install --cache-dir "$PIPCACHE" -r "${VENV}/src/requirements.txt"; \
-    \
-    makerdao-helper "$APP" --help; \
+    makerdao-installer plunger 38e7a362109296f84fd33265af84013c6dadcc62; \
+    makerdao-helper plunger --help; \
     \
     \
     # https://github.com/makerdao/arbitrage-keeper
-    APP=arbitrage-keeper; \
-    GIT_HASH=0679f30335ac48b96f5e60550c6a49e46612be8a; \
-    \
-    VENV="/opt/$APP"; \
-    \
-    mkdir -p "${VENV}"; \
-    chown abc:abc "${VENV}"; \
-    chroot --userspec=abc / python3.6 -m venv "${VENV}"; \
-    chroot --userspec=abc / "${VENV}/bin/pip" install --cache-dir "$PIPCACHE" -U setuptools pip; \
-    \
-    git clone https://github.com/makerdao/${APP}.git "${VENV}/src"; \
-    cd "${VENV}/src"; \
-    git reset --hard "$GIT_HASH"; \
-    git submodule update --init --recursive; \
-    chown -R abc:abc .; \
-    chroot --userspec=abc / "${VENV}/bin/pip" install --cache-dir "$PIPCACHE" -r "${VENV}/src/requirements.txt"; \
-    \
-    makerdao-helper "$APP" --help; \
+    makerdao-installer arbitrage-keeper 0679f30335ac48b96f5e60550c6a49e46612be8a; \
+    makerdao-helper arbitrage-keeper --help; \
     \
     \
     # https://github.com/makerdao/auction-keeper
-    APP=auction-keeper; \
-    GIT_HASH=19cda06d5bbc9d61e01979f3c40e6bafd9d8b570; \
-    \
-    VENV="/opt/$APP"; \
-    \
-    mkdir -p "${VENV}"; \
-    chown abc:abc "${VENV}"; \
-    chroot --userspec=abc / python3.6 -m venv "${VENV}"; \
-    chroot --userspec=abc / "${VENV}/bin/pip" install --cache-dir "$PIPCACHE" -U setuptools pip; \
-    \
-    git clone https://github.com/makerdao/${APP}.git "${VENV}/src"; \
-    cd "${VENV}/src"; \
-    git reset --hard "$GIT_HASH"; \
-    git submodule update --init --recursive; \
-    chown -R abc:abc .; \
-    chroot --userspec=abc / "${VENV}/bin/pip" install --cache-dir "$PIPCACHE" -r "${VENV}/src/requirements.txt"; \
-    \
-    makerdao-helper "$APP" --help; \
+    makerdao-installer auction-keeper 19cda06d5bbc9d61e01979f3c40e6bafd9d8b570; \
+    makerdao-helper auction-keeper --help; \
     \
     \
     # https://github.com/makerdao/bite-keeper
-    APP=bite-keeper; \
-    GIT_HASH=e606456115cab88636a88a1ff403a81dd80cca77; \
-    \
-    VENV="/opt/$APP"; \
-    \
-    mkdir -p "${VENV}"; \
-    chown abc:abc "${VENV}"; \
-    chroot --userspec=abc / python3.6 -m venv "${VENV}"; \
-    chroot --userspec=abc / "${VENV}/bin/pip" install --cache-dir "$PIPCACHE" -U setuptools pip; \
-    \
-    git clone https://github.com/makerdao/${APP}.git "${VENV}/src"; \
-    cd "${VENV}/src"; \
-    git reset --hard "$GIT_HASH"; \
-    git submodule update --init --recursive; \
-    chown -R abc:abc .; \
-    chroot --userspec=abc / "${VENV}/bin/pip" install --cache-dir "$PIPCACHE" -r "${VENV}/src/requirements.txt"; \
-    \
-    makerdao-helper "$APP" --help; \
+    makerdao-installer bite-keeper e606456115cab88636a88a1ff403a81dd80cca77; \
+    makerdao-helper bite-keeper --help; \
     \
     \
     # https://github.com/makerdao/cdp-keeper
-    APP=cdp-keeper; \
-    GIT_HASH=4396f0483b4109701cc292dc175360b8a0f00e3e; \
-    \
-    VENV="/opt/$APP"; \
-    \
-    mkdir -p "${VENV}"; \
-    chown abc:abc "${VENV}"; \
-    chroot --userspec=abc / python3.6 -m venv "${VENV}"; \
-    chroot --userspec=abc / "${VENV}/bin/pip" install --cache-dir "$PIPCACHE" -U setuptools pip; \
-    \
-    git clone https://github.com/makerdao/${APP}.git "${VENV}/src"; \
-    cd "${VENV}/src"; \
-    git reset --hard "$GIT_HASH"; \
-    git submodule update --init --recursive; \
-    chown -R abc:abc .; \
-    chroot --userspec=abc / "${VENV}/bin/pip" install --cache-dir "$PIPCACHE" -r "${VENV}/src/requirements.txt"; \
-    \
-    makerdao-helper "$APP" --help; \
+    makerdao-installer cdp-keeper 4396f0483b4109701cc292dc175360b8a0f00e3e; \
+    makerdao-helper cdp-keeper --help; \
     \
     \
     # https://github.com/makerdao/market-maker-keeper (and etherdelta-client)
-    APP=market-maker-keeper; \
-    GIT_HASH=3f0b2016f186c6c53651143db1e3a2ea6574526d; \
-    \
-    VENV="/opt/$APP"; \
-    \
-    mkdir -p "${VENV}"; \
-    chown abc:abc "${VENV}"; \
-    chroot --userspec=abc / python3.6 -m venv "${VENV}"; \
-    chroot --userspec=abc / "${VENV}/bin/pip" install --cache-dir "$PIPCACHE" -U setuptools pip; \
-    \
-    git clone https://github.com/makerdao/${APP}.git "${VENV}/src"; \
-    cd "${VENV}/src"; \
-    git reset --hard "$GIT_HASH"; \
-    git submodule update --init --recursive; \
-    chown -R abc:abc .; \
-    chroot --userspec=abc / "${VENV}/bin/pip" install --cache-dir "$PIPCACHE" -r "${VENV}/src/requirements.txt"; \
+    makerdao-installer market-maker-keeper 3f0b2016f186c6c53651143db1e3a2ea6574526d; \
+    # TODO: run help for all the -keeper and -cancel and any other scripts
+    APP="market-maker-keeper" makerdao-helper oasis-market-maker-keeper --help; \
     \
     # etherdelta-client for placing orders on EtherDelta using socket.io
-    cd ./lib/pymaker/utils/etherdelta-client; \
+    cd /opt/market-maker-keeper/src/lib/pymaker/utils/etherdelta-client; \
     npm install; \
-    # TODO: this doesn't seem to install anything onto the path. is this correct?
-    \
-    # TODO: run help for all the -keeper and -cancel and any other scripts
-    APP="$APP" makerdao-helper oasis-market-maker-keeper --help; \
     \
     rm -rf /tmp/*; \
 }
