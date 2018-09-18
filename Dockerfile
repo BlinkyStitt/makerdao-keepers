@@ -94,22 +94,13 @@ RUN { set -eux; \
     git clone --depth 1 --recursive https://github.com/dapphub/dapptools $HOME/.dapp/dapptools; \
     nix-env -f $HOME/.dapp/dapptools -iA dapp ethsign hevm jshon seth solc token ; \
     \
-    # dai
-    cd "$HOME/.dapp/dapptools/submodules/dai-cli"; \
-    make link; \
-    \
-    # setzer for price feeds for market-maker-keeper
-    cd "$HOME/.dapp/dapptools/submodules/setzer"; \
-    make link; \
-    \
-    # terra
-    cd "$HOME/.dapp/dapptools/submodules/terra"; \
-    npm install; \
-    make link; \
-    \
-    # https://github.com/makerdao/mcd-cli - makerdao command line interface
+    # https://github.com/makerdao/setzer for price feeds for market-maker-keeper
+    # https://github.com/makerdao/mcd-cli - multi-collateral dai command line interface
     # TODO: can we use dapp pkg to install dai and the others, too?
+    dapp pkg install dai; \
     dapp pkg install mcd; \
+    dapp pkg install setzer; \
+    dapp pkg install terra; \
     \
     rm -rf /tmp/*; \
 }
