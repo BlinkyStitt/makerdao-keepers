@@ -1,4 +1,4 @@
-FROM gitlab.stytt.com:5001/docker/dapptools as dapptools
+FROM gitlab.stytt.com:5001/docker/linux-nix/ubuntu as nix
 
 # this image could definitely be smaller and build faster, but lets just get it working
 FROM gitlab.stytt.com:5001/docker/python3/ubuntu-s6
@@ -24,7 +24,7 @@ RUN docker-install \
     sudo \
 ;
 
-# install node for etherdelta-client (and probably other scripts)
+# install node for terra, etherdelta-client (and probably other scripts)
 ENV NODE_GPG 9FD3B784BC1C6FC31A8A0A1C1655A0AB68576280
 RUN { set -eux; \
     \
@@ -38,6 +38,46 @@ RUN { set -eux; \
     \
     apt-key adv --keyserver keyserver.ubuntu.com --recv-keys "$NODE_GPG"; \
     docker-install nodejs; \
+    \
+    rm -rf /tmp/*; \
+}
+
+COPY --from=nix /root/.nix-profile /root/.nix-profile
+COPY --from=nix /nix /nix
+COPY --from=nix /root/.profile /root/.profile
+
+# this is needed by /root/.nix-profile/etc/profile.d/nix.sh
+ENV USER root
+
+# we could use `nix-channel --add https://nix.dapphub.com/pkgs/dapphub`, but we want dai-cli, setzer, and terra clones
+RUN { set -eux; \
+    \
+    export GNUPGHOME="$(mktemp -d -p /tmp)"; \
+    export MANPATH=""; \
+    . /root/.nix-profile/etc/profile.d/nix.sh; \
+    \
+    # install binaries instead of building from source (which takes a very long time)
+    cachix use dapp; \
+    # dapp, seth, solc, hevm, ethsign (and also jshon)
+    # TODO: clone a specific hash here
+    git clone --depth 1 --recursive https://github.com/dapphub/dapptools $HOME/.dapp/dapptools; \
+    nix-env -f $HOME/.dapp/dapptools -iA dapp ethsign hevm jshon seth solc token ; \
+    \
+    # dai
+    cd "$HOME/.dapp/dapptools/submodules/dai-cli"; \
+    make link; \
+    \
+    # setzer for price feeds for market-maker-keeper
+    cd "$HOME/.dapp/dapptools/submodules/setzer"; \
+    make link; \
+    \
+    # terra
+    cd "$HOME/.dapp/dapptools/submodules/terra"; \
+    npm install; \
+    make link; \
+    \
+    # https://github.com/makerdao/mcd-cli - makerdao command line interface
+    dapp pkg install mcd; \
     \
     rm -rf /tmp/*; \
 }
@@ -57,7 +97,7 @@ COPY /rootfs/bin/makerdao-helper /bin/
 # TODO: i don't love having all these installs in one RUN, but they share a lot of cache
 RUN { set -eux; \
     \
-    PIPCACHE="$(mktemp -d -p /tmp)"; \
+    PIPCACHE="$(chroot --userspec=abc / mktemp -d -p /tmp)"; \
     \
     # https://github.com/makerdao/plunger
     # run this before starting any of the keepers since pending transactions can break things!
@@ -193,17 +233,5 @@ RUN { set -eux; \
     \
     rm -rf /tmp/*; \
 }
-
-# how big are these layers? should we copy nix stuff earlier?
-COPY --from=dapptools /root/.nix-profile /root/.nix-profile
-COPY --from=dapptools /nix /nix
-COPY --from=dapptools /root/.dapp/dapptools /root/.dapp/dapptools
-COPY --from=dapptools /usr/local/bin /usr/local/bin
-COPY --from=dapptools /root/.profile /root/.profile
-
-# this is needed by profile.d/nix.sh
-ENV USER root
-# make sure dapp is actually on the path
-RUN bash -l dapp help
 
 COPY rootfs/ /
