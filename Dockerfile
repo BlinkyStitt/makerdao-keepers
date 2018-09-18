@@ -90,13 +90,16 @@ RUN { set -eux; \
     # install binaries instead of building from source (which takes a very long time)
     cachix use dapp; \
     # dapp, seth, solc, hevm, ethsign (and also jshon)
-    # TODO: clone a specific hash here
-    git clone --depth 1 --recursive https://github.com/dapphub/dapptools $HOME/.dapp/dapptools; \
+    git clone https://github.com/dapphub/dapptools "$HOME/.dapp/dapptools"; \
+    cd "$HOME/.dapp/dapptools"; \
+    git reset --hard "8770146b1fd14019c4323e3f2c4203de91a2d3b5"; \
+    git submodule update --init --recursive; \
     nix-env -f $HOME/.dapp/dapptools -iA dapp ethsign hevm jshon seth solc token ; \
     \
     # https://github.com/makerdao/setzer for price feeds for market-maker-keeper
     # https://github.com/makerdao/mcd-cli - multi-collateral dai command line interface
     # TODO: can we use dapp pkg to install dai and the others, too?
+    dapp pkg install chief; \
     dapp pkg install dai; \
     dapp pkg install mcd; \
     dapp pkg install setzer; \
