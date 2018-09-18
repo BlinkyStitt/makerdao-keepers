@@ -91,7 +91,7 @@ RUN { set -eux; \
     # install binaries instead of building from source (which takes a very long time)
     cachix use dapp; \
     # install pinned versions
-    nix-env -iA dapphub.{dapp-0.9.0,ethsign-0.10,hevm-0.15,seth-0.6.3,solc-0.4.24,token-0.5.1}
+    nix-env -iA dapphub.{dapp-0.9.0,ethsign-0.10,hevm-0.15,seth-0.6.3,solc-0.4.24,token-0.5.1}; \
     \
     # https://github.com/makerdao/setzer - price feeds for market-maker-keeper
     # https://github.com/makerdao/mcd-cli - makerdao command line interface
