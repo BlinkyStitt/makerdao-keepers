@@ -106,7 +106,7 @@ RUN { set -eux; \
 # https://github.com/makerdao/tx-manager
 RUN { set -eux; \
     \
-    git clone --depth 1 https://github.com/makerdao/tx-manager /opt/contracts/tx-manager; \
+    git clone https://github.com/makerdao/tx-manager /opt/contracts/tx-manager; \
     cd /opt/contracts/tx-manager; \
     git reset --hard 754a6da46d25862983ebf2c19eb70632b46896f5; \
     git submodule update --init --recursive; \
