@@ -14,36 +14,244 @@ echo "ETH_FROM: ${ETH_FROM}"
 # TODO: next version of plunger removes the source flag since parity_txqueue is the only option
 makerdao-helper plunger --source parity_txqueue --wait "$ETH_FROM"
 
+cmd_array=(
+    makerdao-helper
+)
+
 # TODO: don't run as root
 case "$KEEPER" in
   arbitrage)
-    exec makerdao-helper arbitrage-keeper \
-      --eth-from "$ETH_FROM" \
-      --tub-address "$TUB_ADDRESS" \
-      --tap-address "$TAP_ADDRESS" \
-      --oasis-address "$OASIS_ADDRESS" \
-      --oasis-support-address "${OASIS_SUPPORT_ADDRESS:-}" \
-      --tx-manager "${TX_MANAGER:-}" \
-      --base-token "$BASE_TOKEN" \
-      --min-profit "${MIN_PROFIT}" \
-      --max-engagement "${MAX_ENGAGEMENT}" \
-    ;
+    cmd_array+=(
+      arbitrage-keeper
+      --eth-from "$ETH_FROM"
+      --tub-address "$TUB_ADDRESS"
+      --tap-address "$TAP_ADDRESS"
+      --oasis-address "$OASIS_ADDRESS"
+      --base-token "$BASE_TOKEN"
+      --min-profit "$MIN_PROFIT"
+      --max-engagement "$MAX_ENGAGEMENT"
+    )
+
+    if [ -n "${EXCHANGE_ADDRESS:-}" ]; then
+      cmd_array+=(
+        --exchange-address "$EXCHANGE_ADDRESS"
+      )
+    fi
+
+    if [ -n "${OASIS_SUPPORT_ADDRESS:-}" ]; then
+      cmd_array+=(
+        --oasis-support-address "$OASIS_SUPPORT_ADDRESS"
+      )
+    fi
+
+    if [ -n "${TX_MANAGER:-}" ]; then
+      cmd_array+=(
+        --tx-manager "$TX_MANAGER"
+      )
+    fi
+
+    if [ -n "${RELAYER_API_SERVER:-}" ]; then
+      cmd_array+=(
+        --relayer-api-server "$RELAYER_API_SERVER"
+      )
+    fi
+
+    if [ -n "${RELAYER_PER_PAGE:-}" ]; then
+      cmd_array+=(
+        --relayer-per-page "$RELAYER_PER_PAGE"
+      )
+    fi
+
+    if [ -n "${GAS_PRICE:-}" ]; then
+      cmd_array+=(
+        --gas-price "$GAS_PRICE"
+
+      )
+    fi
+
+    if [ -n "${MAX_ERRORS:-}" ]; then
+      cmd_array+=(
+        --max-errors "$MAX_ERRORS"
+
+      )
+    fi
+
     ;;
 
-  auction|cdp|market-maker)
-    echo "Keeper help not yet written. tailing /dev/null instead."
-    exec tail -f /dev/null
+  auction)
+    if [ ! -x "$MODEL" ]; then
+      echo "MODEL \"$MODEL\" is not an executable script."
+      exit 1
+    fi
+
+    cmd_array+=(
+      auction-keeper
+      --eth-from "$ETH_FROM"
+      --model "$MODEL"
+    )
+
+    if [ -n "${FLIPPER:-}" ]; then
+      cmd_array+=(
+        --flipper "$FLIPPER"
+      )
+    fi
+
+    if [ -n "${FLAPPER:-}" ]; then
+      cmd_array+=(
+        --flapper "$FLAPPER"
+      )
+    fi
+
+    if [ -n "${FLOPPER:-}" ]; then
+      cmd_array+=(
+        --flopper "$FLOPPER"
+      )
+    fi
+
     ;;
 
   bite)
-    exec makerdao-helper bite-keeper \
-      --eth-from "$ETH_FROM" \
-      --tub-address "$TUB_ADDRESS" \
-    ;
-  ;;
+    cmd_array+=(
+      bite-keeper
+      --eth-from "$ETH_FROM"
+      --tub-address "$TUB_ADDRESS"
+    )
+
+    if [ -n "${GAS_PRICE:-}" ]; then
+      cmd_array+=(
+        --gas-price "$GAS_PRICE"
+
+      )
+    fi
+
+    ;;
+
+  cdp)
+    cmd_array+=(
+      cdp-keeper
+      --eth-from "$ETH_FROM"
+      --tub-address "$TUB_ADDRESS"
+      --min-margin "$MIN_MARGIN"
+      --top-up-margin "$TOP_UP_MARGIN"
+      --max-sai "$MAX_SAI"
+      --avg-sai "$AVG_SAI"
+    )
+
+    if [ -n "${GAS_PRICE:-}" ]; then
+      cmd_array+=(
+        --gas-price "$GAS_PRICE"
+      )
+    fi
+
+    ;;
+
+  market-maker)
+    echo "Invalid keeper."
+    ls /opt/market-maker-keeper/bin/*-keeper /opt/market-maker-keeper/bin/*-cancel
+    exit 1
+
+    ;;
+
+  oasis-market-maker)
+    export APP=market-maker-keeper
+
+    cmd_array+=(
+      oasis-market-maker-keeper
+      --eth-from "$ETH_FROM"
+      --oasis-address "$OASIS_ADDRESS"
+      --buy-token-address "$BUY_TOKEN_ADDRESS"
+      --sell-token-address "$SELL_TOKEN_ADDRESS"
+      --config "$CONFIG"
+      --price-feed "$PRICE_FEED"
+    )
+
+    if [ -n "${TUB_ADDRESS:-}" ]; then
+      cmd_array+=(
+        --tub-address "$TUB_ADDRESS"
+      )
+    fi
+
+    if [ -n "${OASIS_SUPPORT_ADDRESS:-}" ]; then
+      cmd_array+=(
+        --oasis-support-address "$OASIS_SUPPORT_ADDRESS"
+      )
+    fi
+
+    if [ -n "${PRICE_FEED_EXPIRY:-}" ]; then
+      cmd_array+=(
+        --price-feed-expiry "$PRICE_FEED_EXPIRY"
+      )
+    fi
+
+    if [ -n "${SPREAD_FEED:-}" ]; then
+      cmd_array+=(
+        --spread-feed "$SPREAD_FEED"
+      )
+    fi
+
+    if [ -n "${SPREAD_FEED_EXPIRY:-}" ]; then
+      cmd_array+=(
+        --spread-feed-expiry "$SPREAD_FEED_EXPIRY"
+      )
+    fi
+
+    if [ -n "${ORDER_HISTORY:-}" ]; then
+      cmd_array+=(
+        --order-history "$ORDER_HISTORY"
+      )
+    fi
+
+    if [ -n "${ORDER_HISTORY_EVERY:-}" ]; then
+      cmd_array+=(
+        --order-history-every "$ORDER_HISTORY_EVERY"
+      )
+    fi
+
+    if [ -n "${ROUND_PLACES:-}" ]; then
+      cmd_array+=(
+        --round-places "$ROUND_PLACES"
+      )
+    fi
+
+    if [ -n "${MIN_ETH_BALANCE:-}" ]; then
+      cmd_array+=(
+        --min-eth-balance "$MIN_ETH_BALANCE"
+      )
+    fi
+
+    if [ -n "${SMART_GAS_PRICE:-}" ]; then
+      cmd_array+=(
+        --smart-gas-price
+      )
+    fi
+
+    if [ -n "${GAS_PRICE:-}" ]; then
+      cmd_array+=(
+        --gas-price "$GAS_PRICE"
+      )
+    fi
+
+    if [ -n "${REFRESH_FREQUENCY:-}" ]; then
+      cmd_array+=(
+        --refresh-frequency "$REFRESH_FREQUENCY"
+      )
+    fi
+
+    ;;
 
   *)
     echo "Unknown keeper"
     exit 1
 
+    ;;
+
 esac
+
+if [ -n "${DEBUG:-}" ]; then
+  cmd_array+=(
+    --debug
+  )
+fi
+
+# TODO: run as another user?
+exec "${cmd_array[@]}" 2>&1
