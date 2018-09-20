@@ -54,14 +54,14 @@ cmd_array+=(
 )
 
 # add --rpc-host and --rpc-port unless NO_RPC is set to something
-if [ -z "$NO_RPC" ]; then
-  if [ -n "$RPC_HOST" ]; then
+if [ -z "${NO_RPC:-}" ]; then
+  if [ -n "${RPC_HOST:-}" ]; then
     cmd_array+=(
       --rpc-host "$RPC_HOST"
     )
   fi
 
-  if [ -n "$RPC_PORT" ]; then
+  if [ -n "${RPC_PORT:-}" ]; then
     cmd_array+=(
       --rpc-port "$RPC_PORT"
     )
