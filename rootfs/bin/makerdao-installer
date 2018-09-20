@@ -11,6 +11,9 @@ chown abc:abc "${venv}"
 chroot --userspec=abc / python3.6 -m venv "${venv}"
 chroot --userspec=abc / "${venv}/bin/pip" install --cache-dir "${PIPCACHE:-}" -U setuptools pip
 
+# for profiling
+chroot --userspec=abc / "${venv}/bin/pip" install --cache-dir "${PIPCACHE:-}" git+https://github.com/evanhempel/python-flamegraph.git
+
 git clone "https://github.com/makerdao/${app}.git" "${venv}/src"
 cd "${venv}/src"
 git reset --hard "$git_hash"

@@ -21,25 +21,39 @@ export PATH="/opt/${app}/src/bin:$PATH"
 cmd=$1
 shift
 
+cmd_array=()
+
+if [ "${PROFILE:-}" ]; then
+  cmd_array+=(
+    python -m flamegraph -o /tmp/perf.log
+  )
+fi
+
 # TODO: inject --rpc-host and --rpc-port
 # TODO: modify the scripts to read config/environment variables for flags
-cmd_array=(
-    "$cmd"
+cmd_array+=(
+  "$cmd"
 )
 
 # add --rpc-host and --rpc-port unless NO_RPC is set to something
 if [ -z "$NO_RPC" ]; then
   if [ -n "$RPC_HOST" ]; then
-      cmd_array+=(
-          --rpc-host="$RPC_HOST"
-      )
+    cmd_array+=(
+      --rpc-host="$RPC_HOST"
+    )
   fi
 
   if [ -n "$RPC_PORT" ]; then
-      cmd_array+=(
-          --rpc-port="$RPC_PORT"
-      )
+    cmd_array+=(
+      --rpc-port="$RPC_PORT"
+    )
   fi
+fi
+
+if [ -n "${DEBUG:-}" ]; then
+  cmd_array+=(
+    --debug
+  )
 fi
 
 exec "${cmd_array[@]}" "$@"

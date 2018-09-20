@@ -79,8 +79,9 @@ case "$KEEPER" in
     ;;
 
   auction)
-    if [ ! -x "$MODEL" ]; then
-      echo "MODEL \"$MODEL\" is not an executable script."
+    # TODO: how should we handle this model script? need to read more docs on what it should do
+    if [ ! -x "${MODEL:-}" ]; then
+      echo "MODEL \"${MODEL:-}\" is not an executable script."
       exit 1
     fi
 
@@ -246,12 +247,6 @@ case "$KEEPER" in
     ;;
 
 esac
-
-if [ -n "${DEBUG:-}" ]; then
-  cmd_array+=(
-    --debug
-  )
-fi
 
 # TODO: run as another user?
 exec "${cmd_array[@]}" 2>&1
