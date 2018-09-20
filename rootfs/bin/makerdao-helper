@@ -41,7 +41,7 @@ cmd=$1
 shift
 
 # TODO: I wish they were more consistent :'(
-if [ "$app" = "auction_keeper" ] && [ "$cmd" = "auction_keeper" ]; then
+if [ "${app//-/_}" = "auction_keeper" ] && [ "${cmd//-/_}" = "auction_keeper" ]; then
   cmd=main
 fi
 
