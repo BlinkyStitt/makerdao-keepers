@@ -6,18 +6,21 @@ git_hash=$2
 
 venv="/opt/$app"
 
-mkdir -p "${venv}"
-chown abc:abc "${venv}"
+mkdir -p "${venv}/src"
+chown -R abc:abc "${venv}"
+
+# everything after here runs as the abc user. chroot doesn't set HOME, but pip+git expects it
+export HOME=/home/abc
+
 chroot --userspec=abc / python3.6 -m venv "${venv}"
 chroot --userspec=abc / "${venv}/bin/pip" install --cache-dir "${PIPCACHE:-}" -U setuptools pip
 
 # for profiling
 chroot --userspec=abc / "${venv}/bin/pip" install --cache-dir "${PIPCACHE:-}" git+https://github.com/evanhempel/python-flamegraph.git
 
-git clone "https://github.com/makerdao/${app}.git" "${venv}/src"
-cd "${venv}/src"
-git reset --hard "$git_hash"
-git submodule update --init --recursive
-chown -R abc:abc .
+chroot --userspec=abc / git clone "https://github.com/makerdao/${app}.git" "${venv}/src"
+chroot --userspec=abc / cd "${venv}/src"
+chroot --userspec=abc / git reset --hard "$git_hash"
+chroot --userspec=abc / git submodule update --init --recursive
 
 chroot --userspec=abc / "${venv}/bin/pip" install --cache-dir "${PIPCACHE:-}" -r "${venv}/src/requirements.txt"
