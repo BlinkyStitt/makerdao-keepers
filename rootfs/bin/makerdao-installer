@@ -4,23 +4,22 @@ set -eux
 app=$1
 git_hash=$2
 
+# create virtualenv for the app
 venv="/opt/$app"
+mkdir -p "${venv}"
+chown abc:abc "${venv}"
+chroot --userspec=abc / HOME=/home/abc python3.6 -m venv "${venv}"
+chroot --userspec=abc / HOME=/home/abc "${venv}/bin/pip" install --cache-dir "${PIPCACHE:-}" -U setuptools pip
 
-mkdir -p "${venv}/src"
-chown -R abc:abc "${venv}"
+# install flamegraph for profiling
+chroot --userspec=abc / HOME=/home/abc "${venv}/bin/pip" install --cache-dir "${PIPCACHE:-}" git+https://github.com/evanhempel/python-flamegraph.git
 
-# everything after here runs as the abc user. chroot doesn't set HOME, but pip+git expects it
-export HOME=/home/abc
+# clone the app
+git clone "https://github.com/makerdao/${app}.git" "${venv}/src"
+cd "${venv}/src"
+git reset --hard "$git_hash"
+git submodule update --init --recursive
+chown -R abc:abc .
 
-chroot --userspec=abc / python3.6 -m venv "${venv}"
-chroot --userspec=abc / "${venv}/bin/pip" install --cache-dir "${PIPCACHE:-}" -U setuptools pip
-
-# for profiling
-chroot --userspec=abc / "${venv}/bin/pip" install --cache-dir "${PIPCACHE:-}" git+https://github.com/evanhempel/python-flamegraph.git
-
-chroot --userspec=abc / git clone "https://github.com/makerdao/${app}.git" "${venv}/src"
-chroot --userspec=abc / cd "${venv}/src"
-chroot --userspec=abc / git reset --hard "$git_hash"
-chroot --userspec=abc / git submodule update --init --recursive
-
-chroot --userspec=abc / "${venv}/bin/pip" install --cache-dir "${PIPCACHE:-}" -r "${venv}/src/requirements.txt"
+# install dependencies
+chroot --userspec=abc / HOME=/home/abc "${venv}/bin/pip" install --cache-dir "${PIPCACHE:-}" -r "${venv}/src/requirements.txt"
