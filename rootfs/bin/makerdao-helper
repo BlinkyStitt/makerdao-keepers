@@ -1,10 +1,13 @@
 #!/bin/bash
-# enter the correct virtualenv before running the command and add rpc flags
+# enter the correct virtualenv and set PYTHONPATH and add rpc flags before running the command
 # i don't love this, but it works
-# usage: makerdao-helper plunger --helper
+# usage: makerdao-helper plunger --help
 # usage: APP=market-maker-keeper makerdao-helper oasis-market-maker-keeper --help
+# note: this uses the python module name, so 0x is zrx!
 
-if [ -n "$APP" ]; then
+set -eu
+
+if [ -n "${APP:-}" ]; then
   app=$APP
 else
   app=$1
@@ -13,39 +16,50 @@ fi
 
 # TODO: if nix things aren't on the path, add them?
 
-# enter the virtualenv so that when their script calls pyhon, it calls the right python
+# enter the virtualenv so that when their script calls python, it calls the right python
 . "/opt/${app}/bin/activate"
 
-export PATH="/opt/${app}/src/bin:$PATH"
+ # TODO: gdi. flamegraph doesn't work because of these scripts. i wish they just installed things the python way...
+#export PATH="/opt/${app}/src/bin:$PATH"
+PYTHONPATH=${PYTHONPATH}:/opt/${app}/src
+
+if [ -d "/opt/${app}/src/lib" ]; then
+  pushd "/opt/${app}/src/lib"
+  for x in *; do
+    PYTHONPATH=${PYTHONPATH}:$(pwd)/${x}
+  done
+  popd
+fi
+
+export PYTHONPATH
 
 cmd=$1
 shift
 
 cmd_array=()
 
-if [ "${PROFILE:-}" ]; then
+if [ "${PROFILE_LOG:-}" ]; then
   cmd_array+=(
-    python -m flamegraph -o /tmp/perf.log
+    python -m flamegraph -o "$PROFILE_LOG"
   )
 fi
 
-# TODO: inject --rpc-host and --rpc-port
 # TODO: modify the scripts to read config/environment variables for flags
 cmd_array+=(
-  "$cmd"
+  python -m "${app//-/_}.${cmd//-/_}"
 )
 
 # add --rpc-host and --rpc-port unless NO_RPC is set to something
 if [ -z "$NO_RPC" ]; then
   if [ -n "$RPC_HOST" ]; then
     cmd_array+=(
-      --rpc-host="$RPC_HOST"
+      --rpc-host "$RPC_HOST"
     )
   fi
 
   if [ -n "$RPC_PORT" ]; then
     cmd_array+=(
-      --rpc-port="$RPC_PORT"
+      --rpc-port "$RPC_PORT"
     )
   fi
 fi

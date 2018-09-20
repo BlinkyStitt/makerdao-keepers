@@ -165,12 +165,16 @@ RUN { set -eux; \
     \
     # https://github.com/makerdao/market-maker-keeper (and etherdelta-client)
     makerdao-installer market-maker-keeper 3f0b2016f186c6c53651143db1e3a2ea6574526d; \
-    # TODO: run help for all the -keeper and -cancel and any other scripts
-    APP="market-maker-keeper" makerdao-helper oasis-market-maker-keeper --help; \
     \
     # etherdelta-client for placing orders on EtherDelta using socket.io
     cd /opt/market-maker-keeper/src/lib/pymaker/utils/etherdelta-client; \
     npm install; \
+    \
+    # TODO: run help for all the -keeper and -cancel and any other scripts
+    APP="market-maker-keeper" makerdao-helper oasis-market-maker-cancel --help; \
+    APP="market-maker-keeper" makerdao-helper oasis-market-maker-keeper --help; \
+    APP="market-maker-keeper" makerdao-helper etherdelta-market-maker-keeper --help; \
+    APP="market-maker-keeper" makerdao-helper zrx-market-maker-keeper --help; \
     \
     rm -rf /tmp/*; \
 }
