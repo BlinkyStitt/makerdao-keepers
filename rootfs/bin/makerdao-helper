@@ -21,7 +21,11 @@ fi
 
  # TODO: gdi. flamegraph doesn't work because of these scripts. i wish they just installed things the python way...
 #export PATH="/opt/${app}/src/bin:$PATH"
-PYTHONPATH=${PYTHONPATH}:/opt/${app}/src
+if [ -n "${PYTHONPATH:-}" ]; then
+  PYTHONPATH=${PYTHONPATH}:/opt/${app}/src
+else
+  PYTHONPATH=/opt/${app}/src
+fi
 
 if [ -d "/opt/${app}/src/lib" ]; then
   pushd "/opt/${app}/src/lib"
