@@ -50,21 +50,13 @@ cmd_array=()
 
 if [ "${PROFILE_LOG:-}" ]; then
   cmd_array+=(
-    python3 -m flamegraph -o "$PROFILE_LOG"
+    python -m flamegraph -o "$PROFILE_LOG"
   )
 fi
 
-# TODO: modify the scripts to read config/environment variables for flags and have a proper setup.py and entrypoints
-hacky_script="/opt/${app}/bin/run"
-cat >"$hacky_script" <<EOF
-#!/usr/bin/env python3
-from ${app//-/_} import ${cmd//-/_}
-${cmd//-/_}()
-EOF
-chmod 755 "$hacky_script"
-
+# TODO: modify the scripts to read config/environment variables for flags
 cmd_array+=(
-  "$hacky_script"
+  python -m "${app//-/_}.${cmd//-/_}"
 )
 
 # add --rpc-host and --rpc-port unless NO_RPC is set to something
