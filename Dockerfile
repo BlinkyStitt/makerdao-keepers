@@ -174,7 +174,7 @@ RUN { set -eux; \
     APP="market-maker-keeper" makerdao-helper oasis-market-maker-cancel --help; \
     APP="market-maker-keeper" makerdao-helper oasis-market-maker-keeper --help; \
     APP="market-maker-keeper" makerdao-helper etherdelta-market-maker-keeper --help; \
-    APP="market-maker-keeper" makerdao-helper zrx-market-maker-keeper --help; \
+    APP="market-maker-keeper" makerdao-helper 0x-market-maker-keeper --help; \
     \
     rm -rf /tmp/*; \
 }
