@@ -13,10 +13,6 @@ HOME=/home/abc chroot --userspec=abc / \
 HOME=/home/abc chroot --userspec=abc / \
   "${venv}/bin/pip" install --cache-dir "${PIPCACHE:-}" -U setuptools pip
 
-# install flamegraph for profiling
-HOME=/home/abc chroot --userspec=abc / \
-  "${venv}/bin/pip" install --cache-dir "${PIPCACHE:-}" https://github.com/evanhempel/python-flamegraph/archive/master.tar.gz
-
 # clone the app
 git clone "https://github.com/makerdao/${app}.git" "${venv}/src"
 cd "${venv}/src"

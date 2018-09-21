@@ -19,46 +19,17 @@ fi
 # enter the virtualenv so that when their script calls python, it calls the right python
 . "/opt/${app}/bin/activate"
 
- # TODO: gdi. flamegraph doesn't work because of these scripts. i wish they just installed things the python way...
-#export PATH="/opt/${app}/src/bin:$PATH"
-if [ -n "${PYTHONPATH:-}" ]; then
-  PYTHONPATH=${PYTHONPATH}:/opt/${app}/src
-else
-  PYTHONPATH=/opt/${app}/src
-fi
-
-if [ -d "/opt/${app}/src/lib" ]; then
-  pushd "/opt/${app}/src/lib"
-  for x in *; do
-    PYTHONPATH=${PYTHONPATH}:$(pwd)/${x}
-  done
-  popd
-fi
-
-export PYTHONPATH
+# add non-standard entrypoints to the PATH
+export PATH="/opt/${app}/src/bin:$PATH"
 
 cmd=$1
 shift
 
-# TODO: I wish they were more consistent :'(
-if [ "${app//-/_}" = "auction_keeper" ] && [ "${cmd//-/_}" = "auction_keeper" ]; then
-  cmd=main
-fi
-
-
-cmd_array=()
-
-if [ "${PROFILE_LOG:-}" ]; then
-  cmd_array+=(
-    python -m flamegraph -o "$PROFILE_LOG"
-  )
-fi
-
-# TODO: modify the scripts to read config/environment variables for flags
-cmd_array+=(
-  python -m "${app//-/_}.${cmd//-/_}"
+cmd_array=(
+  $cmd
 )
 
+# TODO: modify the scripts to read config/environment variables for flags
 # add --rpc-host and --rpc-port unless NO_RPC is set to something
 if [ -z "${NO_RPC:-}" ]; then
   if [ -n "${RPC_HOST:-}" ]; then
