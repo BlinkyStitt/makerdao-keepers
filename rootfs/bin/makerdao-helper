@@ -46,25 +46,18 @@ if [ "${app//-/_}" = "auction_keeper" ] && [ "${cmd//-/_}" = "auction_keeper" ];
 fi
 
 
-cmd_array=()
+cmd_array=(
+  python3
+)
 
 if [ "${PROFILE_LOG:-}" ]; then
   cmd_array+=(
-    python3 -m flamegraph -o "$PROFILE_LOG"
+    -m flamegraph -o "$PROFILE_LOG"
   )
 fi
 
-# TODO: modify the scripts to read config/environment variables for flags and have a proper setup.py and entrypoints
-hacky_script="/opt/${app}/bin/run"
-cat >"$hacky_script" <<EOF
-#!/usr/bin/env python3
-from ${app//-/_} import ${cmd//-/_}
-${cmd//-/_}()
-EOF
-chmod 755 "$hacky_script"
-
 cmd_array+=(
-  "$hacky_script"
+  "/opt/${app}/src/${app}/${app//-/_}/${cmd//-/_}.py"
 )
 
 # add --rpc-host and --rpc-port unless NO_RPC is set to something
