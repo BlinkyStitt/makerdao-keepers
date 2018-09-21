@@ -57,7 +57,7 @@ if [ "${PROFILE_LOG:-}" ]; then
 fi
 
 cmd_array+=(
-  "/opt/${app}/src/${app//-/_}/${cmd//-/_}.py"
+  "/opt/${app}/src/${app}/${app//-/_}/${cmd//-/_}.py"
 )
 
 # add --rpc-host and --rpc-port unless NO_RPC is set to something
