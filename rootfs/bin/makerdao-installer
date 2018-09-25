@@ -9,7 +9,7 @@ venv="/opt/$app"
 mkdir -p "${venv}"
 chown abc:abc "${venv}"
 HOME=/home/abc chroot --userspec=abc / \
-  /usr/bin/python3.6 -m venv "${venv}"
+  python3.6 -m venv "${venv}"
 HOME=/home/abc chroot --userspec=abc / \
   "${venv}/bin/pip" install --cache-dir "${PIPCACHE:-}" -U setuptools pip
 
