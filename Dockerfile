@@ -4,7 +4,6 @@ FROM gitlab.stytt.com:5001/docker/python3/ubuntu-s6
 RUN docker-install \
     autoconf \
     automake \
-    apt-transport-https \
     build-essential \
     bzip2 \
     curl \
