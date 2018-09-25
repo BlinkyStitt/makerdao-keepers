@@ -26,6 +26,7 @@ RUN docker-install \
 ;
 
 # install node for terra, etherdelta-client (and probably other scripts)
+# TODO: automate distro
 ENV NODE_GPG 9FD3B784BC1C6FC31A8A0A1C1655A0AB68576280
 RUN { set -eux; \
     \
@@ -33,7 +34,7 @@ RUN { set -eux; \
     export GNUPGHOME="$(mktemp -d -p /tmp)"; \
     \
     VERSION=node_10.x; \
-    DISTRO=$(cat /etc/*-release | grep -oP 'CODENAME=\K\w+$' | head -1); \
+    DISTRO=bionic; \
     echo "deb https://deb.nodesource.com/$VERSION $DISTRO main" > /etc/apt/sources.list.d/nodesource.list; \
     echo "deb-src https://deb.nodesource.com/$VERSION $DISTRO main" >> /etc/apt/sources.list.d/nodesource.list; \
     \
