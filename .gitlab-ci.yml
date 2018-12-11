@@ -1,4 +1,4 @@
-image: gitlab.stytt.com:5001/docker/docker-builder:latest
+image: gitlab-registry.stytt.com/docker/docker-builder:latest
 
 stages:
 - build

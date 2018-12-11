@@ -1,5 +1,5 @@
 # this image could definitely be smaller and build faster, but lets just get it working
-FROM gitlab.stytt.com:5001/docker/python3/ubuntu-s6
+FROM gitlab-registry.stytt.com/docker/python3/ubuntu-s6
 
 RUN docker-install \
     autoconf \
