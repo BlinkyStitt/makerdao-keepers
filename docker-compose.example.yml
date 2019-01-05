@@ -1,0 +1,321 @@
+version: '2.4'
+
+networks:
+  shared_consul:
+    external: true  # external means this was created outside of this file
+  private:
+  kovan_private:
+
+volumes:
+  geth_consul:
+    driver_opts:
+      type: none
+      device: "$ZFS_VOLS/ethereum/geth_consul"
+      o: bind
+
+  geth_data:
+    driver_opts:
+      type: none
+      # i think we should have a dedicated server with a large nvme drive for geth
+      device: "$ZFS_VOLS/ethereum/geth_data"
+      o: bind
+
+  parity_data:
+    driver_opts:
+      type: none
+      device: "$ZFS_VOLS/ethereum/parity_data"
+      o: bind
+
+  kovan_parity_data:
+    driver_opts:
+      type: none
+      device: "$ZFS_VOLS/ethereum/kovan_parity_data"
+      o: bind
+
+  kovan_parity_secrets:
+    driver_opts:
+      type: none
+      device: "$ZFS_VOLS/ethereum/kovan_parity_secrets"
+      o: bind
+
+services:
+  # TODO: connect to our parity instance (use consul?)
+  geth:
+    image: gitlab-registry.stytt.com/docker/ethereum-geth
+    blkio_config:
+      weight: 1000  # 0-1000, 500 is default
+    cpu_shares: 1536
+    restart: always
+    ports:
+      - "30303:30303/tcp"  # p2p
+      - "30303:30303/udp"  # p2p discovery
+    networks:
+      private:
+      shared_consul:
+    volumes:
+      - geth_data:/home/abc/.ethereum/
+      - geth_consul:/data/consul/
+    environment:
+      ETHEREUM_CACHE: 2048
+      ETHEREUM_SYNCMODE: full
+      ETHEREUM_MAXPEERS: 30
+      ETHEREUM_LIGHTPEERS: 10
+      ETHEREUM_LIGHTSERV: 33
+      ETHEREUM_RPC_VHOSTS: "eth.stytt.com,localhost"
+      ETHEREUM_RPC_CORS: "*"
+      SERVICE_NAME: geth
+      SERVICE_PROJECT: ethereum
+
+  # TODO: setup with vault and put ssl with client certs on rpc endpoints
+  # TODO: connect to our geth instance (use consul?)
+  # TODO: 30305 is currently open to the internet. once we run keepers we should close the port so that cpu time is spent on our stuff
+ parity:
+   image: gitlab-registry.stytt.com/docker/ethereum-parity
+   environment:
+     # TODO: use stunnel and SSL client certs to have proper authentication
+     # TODO: RPC = HTTP. rename these
+     # TODO: move these to geth. geth seems to be using a lot less resources
+     ETHEREUM_RPC_INTERFACE: eth0
+     ETHEREUM_WS_INTERFACE: eth0
+   restart: always
+   networks:
+     shared_public:
+       ipv4_address: $PUBLIC_NET4.129
+   expose:
+     # note the non-standard ports
+     - "30305/tcp"  # p2p
+     - "30305/udp"  # p2p discovery
+   volumes:
+     - parity_data:/home/abc/.local/share/io.parity.ethereum/
+   blkio_config:
+     weight: 200  # 0-1000, 500 is default
+   cpu_shares: 256
+
+    kovan-parity:
+    TODO: use latest tag
+    image: gitlab-registry.stytt.com/docker/ethereum-parity
+    cpu_shares: 256
+    blkio_config:
+     weight: 100  # 0-1000, 500 is default
+    environment:
+     ETHEREUM_CHAIN: kovan
+     ETHEREUM_RPC_INTERFACE: eth1
+    restart: always  # TODO: put this back on once it is stable
+    networks:
+      shared_public:
+        ipv4_address: $PUBLIC_NET4.148
+        kovan_private:  # parity rpc listens on this interface
+    expose:
+      TODO: what ports?
+      - "30305/tcp"  # p2p
+      - "30305/udp"  # p2p discovery
+      volumes:
+      - kovan_parity_secrets:/secrets
+         - kovan_parity_data:/home/abc/.local/share/io.parity.ethereum/
+    FUNDED: 0x9c8aff979c079d10bfe6c0011e9bfd84246abd29
+    EMPTY: 0xadc4247d0e19f537a0e550be010fe46bd3b3e0f1,0xd0450475dfbf2927d879d49856ff428d02871c45,0xdd37e48f289cbdc1dd727d5f152eeb12bf23a1e3
+
+  TODO: setup actual keepers with consul and vault. then parity-kovan would be a consul connect proxy on the default localhost:8545
+  auction, arbitrage, bite, cdp, market-maker
+  `seth send 0x2cb53ca7500d8d04888e0E348cB601CB9abe395D "gimme()"`
+  TODO: i ran seth send, but it sat on Waiting for transaction receipt.........
+  TODO: write model
+ kovan-auction-keeper-flipper-eth:
+   image: gitlab-registry.stytt.com/docker/makerdao-keepers
+   networks:
+     kovan_private:  # parity rpc listens on this interface
+   #volumes:
+     # TODO: i tried setting ETH_RPC_ACCOUNTS=true so it would use the rpc, but seth send got stuck even with --async
+     # TODO: i think it blocks on the wallet being unlocked and there was a bug with unlocking then
+     #- kovan_parity_data:/root/.local/share/io.parity.ethereum/:ro
+   blkio_config:
+     weight: 100  # 0-1000, 500 is default
+   cpu_shares: 256
+   environment:
+     # TODO: dapp build calls seth without our flags
+     KEEPER: "auction"
+     RPC_HOST: "kovan-parity"
+     ETH_RPC_URL: "http://kovan-parity:8545"
+     ETH_RPC_ACCOUNTS: "true"
+     SETH_CHAIN: "kovan"
+     ETH_FROM: "0x1b34baff11fc7a0934ff6e497233868493598ea8"
+     # https://medium.com/makerdao/the-code-is-ready-2aee2aa62e73
+     #MCD_VAT: "0xcd726790550afcd77e9a7a47e86a3f9010af126b"
+     #MCD_PIT: "0xe7cf3198787c9a4daac73371a38f29aaeeced87e"
+     #MCD_CAT: "0x2f34f22a00ee4b7a8f8bbc4eaee1658774c624e0"
+     #MCD_FLAP: "0x8868bad8e74fca4505676d1b5b21ecc23328d132"
+     #MCD_FLOP: "0x6191c9b0086c2ebf92300cc507009b53996fbffa"
+     #MCD_GOV: "0x6052632c8f977edef616a31d67ce504fb474bb77"
+     #MCD_DAI: "0x444254706e8f1fb62a6ec26a7fa2b942ef672495"
+     #MCD_JOIN_DAI: "0xfcbecd1a2ac11a260f6ff9de400f815f2906a2bd"
+     #MCD_JOIN_ETH: "0x3ccd75157dc0ec69141294eda7a3657a4db8a399"
+     #MCD_OSM_ETH: "0x9FfFE440258B79c5d6604001674A4722FfC0f7Bc"
+     #MCD_FLIP_ETH: "0x32d496ad866d110060866b7125981c73642cc509"
+     #MCD_JOIN_REP: "0x5df073feb82b95af2b3c90ae458201b997512ff7"
+     #MCD_OSM_REP: "0xf88bbdc1e2718f8857f30a180076ec38d53cf296"
+     #MCD_FLIP_REP: "0xC0851F73CC8DD5c0765E71980eC7E7Fd1EF74434"
+     FLIPPER: "0x32d496ad866d110060866b7125981c73642cc509"
+     #PROFILE_LOG: "/tmp/profile-flipper-eth.log"
+
+  TODO: write model
+ kovan-auction-keeper-flipper-rep:
+   image: gitlab-registry.stytt.com/docker/makerdao-keepers
+   networks:
+     kovan_private:  # parity rpc listens on this interface
+   #volumes:
+     # TODO: i tried setting ETH_RPC_ACCOUNTS=true so it would use the rpc, but seth send got stuck even with --async
+     # TODO: i think it blocks on the wallet being unlocked and there was a bug with unlocking then
+     #- kovan_parity_data:/root/.local/share/io.parity.ethereum/:ro
+   blkio_config:
+     weight: 100  # 0-1000, 500 is default
+   cpu_shares: 256
+   environment:
+     # TODO: dapp build calls seth without our flags
+     KEEPER: "auction"
+     RPC_HOST: "kovan-parity"
+     ETH_RPC_URL: "http://kovan-parity:8545"
+     ETH_RPC_ACCOUNTS: "true"
+     SETH_CHAIN: "kovan"
+     ETH_FROM: "0x841075a2825a43d3677a485560c4497b676da211"
+     FLIPPER: "0xC0851F73CC8DD5c0765E71980eC7E7Fd1EF74434"
+     #PROFILE_LOG: "/tmp/profile-flipper-rep.log"
+
+  TODO: write model
+ kovan-auction-keeper-flapper:
+   image: gitlab-registry.stytt.com/docker/makerdao-keepers
+   networks:
+     kovan_private:  # parity rpc listens on this interface
+   #volumes:
+     # TODO: i tried setting ETH_RPC_ACCOUNTS=true so it would use the rpc, but seth send got stuck even with --async
+     # TODO: i think it blocks on the wallet being unlocked and there was a bug with unlocking then
+     #- kovan_parity_data:/root/.local/share/io.parity.ethereum/:ro
+   blkio_config:
+     weight: 100  # 0-1000, 500 is default
+   cpu_shares: 256
+   environment:
+     # TODO: dapp build calls seth without our flags
+     KEEPER: "auction"
+     RPC_HOST: "kovan-parity"
+     ETH_RPC_URL: "http://kovan-parity:8545"
+     ETH_RPC_ACCOUNTS: "true"
+     SETH_CHAIN: "kovan"
+     ETH_FROM: "0x6ac91d400ac8aa2fce5b4b89cd0576a90d4044b0"
+     FLAPPER: "0x8868bad8e74fca4505676d1b5b21ecc23328d132"
+     #PROFILE_LOG: "/tmp/profile-flapper.log"
+
+  TODO: write model
+ kovan-auction-keeper-flopper:
+   image: gitlab-registry.stytt.com/docker/makerdao-keepers
+   networks:
+     kovan_private:  # parity rpc listens on this interface
+   #volumes:
+     # TODO: i tried setting ETH_RPC_ACCOUNTS=true so it would use the rpc, but seth send got stuck even with --async
+     # TODO: i think it blocks on the wallet being unlocked and there was a bug with unlocking then
+     #- kovan_parity_data:/root/.local/share/io.parity.ethereum/:ro
+   blkio_config:
+     weight: 100  # 0-1000, 500 is default
+   cpu_shares: 256
+   environment:
+     # TODO: dapp build calls seth without our flags
+     KEEPER: "auction"
+     RPC_HOST: "kovan-parity"
+     ETH_RPC_URL: "http://kovan-parity:8545"
+     ETH_RPC_ACCOUNTS: "true"
+     SETH_CHAIN: "kovan"
+     ETH_FROM: "0x6ac91d400ac8aa2fce5b4b89cd0576a90d4044b0"
+     FLOPPER: "0x6191c9b0086c2ebf92300cc507009b53996fbffa"
+     #PROFILE_LOG: "/tmp/profile-flopper.log"
+
+  kovan-arbitrage-keeper:
+    image: gitlab-registry.stytt.com/docker/makerdao-keepers
+    networks:
+      kovan_private:  # parity rpc listens on this interface
+    #volumes:
+      # TODO: i tried setting ETH_RPC_ACCOUNTS=true so it would use the rpc, but seth send got stuck even with --async
+      # TODO: i think it blocks on the wallet being unlocked and there was a bug with unlocking then
+      #- kovan_parity_data:/root/.local/share/io.parity.ethereum/:ro
+    environment:
+      # TODO: dapp build calls seth without our flags
+      KEEPER: "arbitrage"
+      RPC_HOST: "kovan-parity"
+      ETH_RPC_URL: "http://kovan-parity:8545"
+      ETH_RPC_ACCOUNTS: "true"
+      SETH_CHAIN: "kovan"
+      ETH_FROM: "0x0ce07631979f6c91f13a11968187adb4a18f684b"
+      TX_MANAGER: "0xe2f21c6f9fb86c05196b488f6a82aed1114bff8d"
+      # https://dai.makerdao.com/
+      DAI_ADDRESS: "0xc4375b7de8af5a38a93548eb8453a498222c4ff2"
+      TOP_ADDRESS: "0x5f00393547561da3030ebf30e52f5dc0d5d3362c"
+      TUB_ADDRESS: "0xa71937147b55deb8a530c7229c442fd3f31b7db2"
+      TAP_ADDRESS: "0xc936749d2d0139174ee0271bd28325074fdbc654"
+      VOX_ADDRESS: "0xbb4339c0ab5b1d9f14bd6e3426444a1e9d86a1d9"
+      # https://github.com/OasisDEX/oasis-react/blob/dev/src/configs.json
+      OASIS_ADDRESS: "0x8cf1cab422a0b6b554077a361f8419cdf122a9f9"
+      OASIS_SUPPORT_ADDRESS: "0x303f2bf24d98325479932881657f45567b3e47a8"
+      # w-eth
+      BASE_TOKEN: "0xd0a1e359811322d97991e03f863a0c30c2cf029c"
+      # ~0.50 USD as of Sep 18, 2018
+      # TODO: have some smarter logic in the run script that sets profit denominated in USD? or in relation to gas?
+      MIN_PROFIT: "0.0024"
+      # 0.2 of base token
+      # TODO: have some smarter logic in the run script that does some % of the starting balance?
+      MAX_ENGAGEMENT: "0.2"
+      #PROFILE_LOG: "/tmp/profile-arbitrage.log"
+    blkio_config:
+      weight: 100  # 0-1000, 500 is default
+    cpu_shares: 256
+
+  kovan-bite-keeper:
+    image: gitlab-registry.stytt.com/docker/makerdao-keepers
+    networks:
+      kovan_private:  # parity rpc listens on this interface
+    blkio_config:
+      weight: 100  # 0-1000, 500 is default
+    cpu_shares: 256
+    #volumes:
+      # TODO: i tried setting ETH_RPC_ACCOUNTS=true so it would use the rpc, but seth send got stuck even with --async
+      # TODO: i think it blocks on the wallet being unlocked and there was a bug with unlocking then
+      #- kovan_parity_data:/root/.local/share/io.parity.ethereum/:ro
+    environment:
+      # TODO: dapp build calls seth without our flags
+      KEEPER: "bite"
+      RPC_HOST: "kovan-parity"
+      ETH_RPC_URL: "http://kovan-parity:8545"
+      ETH_RPC_ACCOUNTS: "true"
+      SETH_CHAIN: "kovan"
+      ETH_FROM: "0x3a6ee717f5cc9767d47bc9b4bdefacbc5bafe933"
+      TX_MANAGER: "0xe2f21c6f9fb86c05196b488f6a82aed1114bff8d"
+      # https://dai.makerdao.com/
+      TUB_ADDRESS: "0xa71937147b55deb8a530c7229c442fd3f31b7db2"
+      #PROFILE_LOG: "/tmp/profile-bite.log"
+
+  # this uses 56% CPU when there isn't even a cdp to watch
+  kovan-cdp-keeper:
+    image: gitlab-registry.stytt.com/docker/makerdao-keepers
+    networks:
+      kovan_private:  # parity rpc listens on this interface
+    blkio_config:
+      weight: 100  # 0-1000, 500 is default
+    cpu_shares: 256
+    #volumes:
+      # TODO: i tried setting ETH_RPC_ACCOUNTS=true so it would use the rpc, but seth send got stuck even with --async
+      # TODO: i think it blocks on the wallet being unlocked and there was a bug with unlocking then
+      #- kovan_parity_data:/root/.local/share/io.parity.ethereum/:ro
+    environment:
+      # TODO: dapp build calls seth without our flags
+      KEEPER: "cdp"
+      RPC_HOST: "kovan-parity"
+      ETH_RPC_URL: "http://kovan-parity:8545"
+      ETH_RPC_ACCOUNTS: "true"
+      SETH_CHAIN: "kovan"
+      ETH_FROM: "0x45e6db0e53e3030432f25ee97af3025b2930ddcc"
+      # https://dai.makerdao.com/
+      TUB_ADDRESS: "0xa71937147b55deb8a530c7229c442fd3f31b7db2"
+      # TODO: i just copied these numbers out of the test. i'm still not sure what MAX_SAI and AVG_SAI do exactly
+      MIN_MARGIN: "0.2"
+      TOP_UP_MARGIN: "0.45"
+      MAX_SAI: "3000"
+      AVG_SAI: "2000"
+      PROFILE_LOG: "/tmp/profile-cdp.log"
+
+# TODO: ipfs?
