@@ -129,7 +129,6 @@ RUN { set -eux; \
     dapp build; \
 }
 
-# TODO: copy /rootfs/bin/makerdao-installer script?
 COPY /rootfs/bin/makerdao-installer /bin/
 COPY /rootfs/bin/makerdao-helper /bin/
 
